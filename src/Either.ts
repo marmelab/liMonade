@@ -1,7 +1,12 @@
-export class Right<T> {
+import { Applicative, Monad } from './types/Applicative';
+
+export class Right<T>
+    implements Applicative<T, 'Either', 'Right'>, Monad<T, 'Either', 'Right'> {
     public static of<A>(value: A): Right<A> {
         return new Right(value);
     }
+    public kind: 'Either';
+    public name: 'Right';
     public readonly value: T;
     constructor(value: T) {
         this.value = value;
@@ -25,10 +30,13 @@ export class Right<T> {
     }
 }
 
-export class Left<T> {
-    public static of<A>(value: A): Left<A> {
+export class Left<T>
+    implements Applicative<T, 'Either', 'Left'>, Monad<T, 'Either', 'Left'> {
+    public static of<A>(value: A) {
         return new Left(value);
     }
+    public kind: 'Either';
+    public name: 'Left';
     public readonly value: T;
     constructor(value: T) {
         this.value = value;
@@ -36,8 +44,8 @@ export class Left<T> {
     public map({}): Left<T> {
         return this;
     }
-    public flatten() {
-        return this.value;
+    public flatten(): Left<T> {
+        return this;
     }
     public chain({}): Left<T> {
         return this;

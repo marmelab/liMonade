@@ -1,4 +1,8 @@
+import createCompose from './Compose';
+import { Left, Right } from './Either';
 import Identity from './Identity';
+import { Just, Nothing } from './Maybe';
+import Applicative from './types/Applicative';
 
 describe('Identity', () => {
     const increment = (v: number) => v + 1;
@@ -74,6 +78,49 @@ describe('Identity', () => {
                     .ap(u)
                     .ap(v)
                     .ap(w),
+            );
+        });
+    });
+    describe('Traversable Law', () => {
+        it('Identity', async () => {
+            await expect(
+                Identity.of('value')
+                    .map(Identity.of)
+                    .sequence(Identity.of),
+            ).toEqual(Identity.of(Identity.of('value')));
+        });
+
+        it('Composition', async () => {
+            const Compose = createCompose(Right, Identity);
+            expect(
+                Identity.of(Right.of(Identity.of(true)))
+                    .map(Compose.of)
+                    .sequence(Compose.of),
+            ).toEqual(
+                Compose.of(
+                    Identity.of(Right.of(Identity.of(true)))
+                        .sequence(Right.of)
+                        .map(v => v.sequence(Identity.of)),
+                ),
+            );
+        });
+
+        it('Naturality', () => {
+            function maybeToEither<T>(maybe: Just<null>): Left<'no value'>;
+            function maybeToEither<T>(maybe: Just<T>): Right<T>;
+            function maybeToEither<T>(
+                maybe: Just<T> | Just<null>,
+            ): Right<T> | Left<string> {
+                return maybe.isNothing()
+                    ? Left.of('no value')
+                    : Right.of(maybe.flatten());
+            }
+
+            const a = Identity.of(Just.of('value')).sequence(Just.of);
+            expect(maybeToEither(a)).toEqual(
+                Identity.of(Just.of('value'))
+                    .map(maybeToEither)
+                    .sequence(Right.of),
             );
         });
     });
