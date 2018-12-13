@@ -20,12 +20,9 @@ export class Just<T>
         return this.value !== null && typeof this.value !== 'undefined';
     }
     public map<A>(this: Just<T>, fn: (v: T) => A): Just<A>;
+    public map<A>(this: Just<T & nothing>, fn: (v: T) => A): Nothing;
     public map<A>(
-        this: Just<T & null | T & undefined>,
-        fn: (v: T) => A,
-    ): Nothing;
-    public map<A>(
-        this: Just<T> | Just<T & null | T & undefined>,
+        this: Just<T> | Just<T & nothing>,
         fn: (v: T) => A,
     ): Just<A> | Nothing {
         return this.isNothing() ? new Nothing() : new Just(fn(this.value));

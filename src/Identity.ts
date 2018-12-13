@@ -1,7 +1,7 @@
-import { Applicative, Monad, Traversable, Functor } from './types/Applicative';
+import { Applicative, Monad, Traversable } from './types/Applicative';
 
 class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
-    public static of<A>(value: A): Identity<A> {
+    public static of<X>(value: X): Identity<X> {
         return new Identity(value);
     }
     public readonly name: 'Identity';
@@ -26,17 +26,17 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     ): Identity<B> {
         return this.chain(fn => other.map(fn));
     }
-    public traverse<N, M, A, B>(
-        this: Identity<Applicative<N, A>>,
+    public traverse<A, N, K>(
         {},
-        fn: (v: Applicative<N, A>) => Applicative<M, B>,
-    ) {
-        return fn(this.value).map(Identity.of);
+        fn: (v: T) => Applicative<A, N, K>,
+    ): Applicative<Identity<A>, N, K> {
+        const appli = fn(this.value);
+        return appli.map<Identity<A>>(Identity.of);
     }
-    public sequence<N, A>(this: Identity<Applicative<N, A>>, {}) {
+    public sequence<A, N, K>(this: Identity<Applicative<A, N, K>>, {}) {
         return this.traverse(
             Identity.of,
-            (v: Applicative<N, A>): Applicative<N, A> => v,
+            (v: Applicative<A, N, K>): Applicative<A, N, K> => v,
         );
     }
 }

@@ -106,8 +106,12 @@ describe('Identity', () => {
         });
 
         it('Naturality', () => {
-            function maybeToEither<T>(maybe: Just<null>): Left<'no value'>;
-            function maybeToEither<T>(maybe: Just<T>): Right<T>;
+            function maybeToEither<T>(
+                maybe: Applicative<null, 'Maybe', 'Just' | 'Nothing'>,
+            ): Left<'no value'>;
+            function maybeToEither<T>(
+                maybe: Applicative<T, 'Maybe', 'Just'>,
+            ): Right<T>;
             function maybeToEither<T>(
                 maybe: Just<T> | Just<null>,
             ): Right<T> | Left<string> {
