@@ -2,6 +2,10 @@ import { Applicative, Monad } from './types/Applicative';
 
 type nothing = undefined | null;
 
+const isNothing = (value: any): value is nothing => {
+    return value === null || typeof value === 'undefined';
+};
+
 export class Just<T>
     implements Applicative<T, 'Maybe', 'Just'>, Monad<T, 'Maybe', 'Just'> {
     public static of<A>(value: A): Just<A> {
@@ -19,13 +23,11 @@ export class Just<T>
     public isJust(): this is Applicative<NonNullable<T>, 'Maybe', 'Just'> {
         return this.value !== null && typeof this.value !== 'undefined';
     }
-    public map<A>(this: Just<T>, fn: (v: T) => A): Just<A>;
-    public map<A>(this: Just<T & nothing>, fn: (v: T) => A): Nothing;
-    public map<A>(
-        this: Just<T> | Just<T & nothing>,
-        fn: (v: T) => A,
-    ): Just<A> | Nothing {
-        return this.isNothing() ? new Nothing() : new Just(fn(this.value));
+    public map<A>(fn: (v: T) => A): Just<A>;
+    public map<A>(fn: (v: T) => nothing): Nothing;
+    public map<A>(fn: ((v: T) => A) | ((v: T) => nothing)): Just<A> | Nothing {
+        const newValue = fn(this.value);
+        return isNothing(newValue) ? new Nothing() : new Just(newValue);
     }
     public flatten(): T {
         return this.value;
@@ -33,30 +35,25 @@ export class Just<T>
     public chain<A>(this: Just<NonNullable<T>>, fn: (v: T) => Just<A>): Just<A>;
     public chain<A>(this: Just<NonNullable<T>>, fn: (v: T) => Nothing): Nothing;
     public chain<A>(
-        this: Just<T & nothing>,
+        this: Just<T>,
         fn: (v: T) => Nothing | Just<NonNullable<A>>,
     ): Nothing;
     public chain<A>(fn: (v: T) => Just<A> | Nothing): Just<A> | Nothing {
-        return this.isNothing() ? new Nothing() : this.map(fn).flatten();
+        return this.map(fn).flatten();
     }
-    public ap<A, B>(this: Just<(v: A) => B & T>, other: Just<A>): Just<B>;
-    public ap<A, B>(this: Just<(v: A) => B & T>, other: Nothing): Nothing;
-    public ap<A, B>(this: Just<nothing & T>, other: Just<A> | Nothing): Nothing;
+    public ap<A, B>(this: Just<(v: A) => B>, other: Just<A>): Just<B>;
+    public ap<A, B>(this: Just<(v: A) => B>, other: Nothing): Nothing;
     public ap<A, B>(
-        this: Just<(v: A) => B & T> | Just<nothing & T>,
+        this: Just<(v: A) => B>,
         other: Just<A> | Nothing,
     ): Just<B> | Nothing {
-        return this.isNothing() || other.isNothing()
+        return other.isNothing()
             ? new Nothing()
             : this.map(fn => fn(other.flatten()));
     }
     public getOrElse<A>(this: Just<T>, value: A): T;
-    public getOrElse<A>(this: Just<null | undefined>, value: A): A;
-    public getOrElse<A>(
-        this: Just<T> | Just<null | undefined>,
-        value: A,
-    ): A | T {
-        return this.isNothing() ? value : this.value;
+    public getOrElse<A>(this: Just<T>, {}): A | T {
+        return this.value;
     }
 }
 

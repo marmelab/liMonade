@@ -18,9 +18,9 @@ export interface Applicative<T, Kind, Name = Kind>
     // ): Applicative<A, Kind, Other>;
     map<A>(fn: (value: T) => A): Applicative<A, Kind, Name>;
     ap<A, B>(
-        this: Applicative<(v: A) => B, Kind, Name>,
-        v: Applicative<A, Kind, Name>,
-    ): Applicative<B, Kind, Name>;
+        this: Applicative<(v: A) => B, Kind, any>,
+        v: Applicative<A, Kind, any>,
+    ): Applicative<B, Kind, any>;
 }
 
 export interface Monad<T, Kind, Name = Kind> extends Functor<T, Kind, Name> {
