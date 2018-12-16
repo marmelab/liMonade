@@ -24,6 +24,7 @@ export interface Applicative<T, Kind, Name = Kind>
 }
 
 export interface Monad<T, Kind, Name = Kind> extends Functor<T, Kind, Name> {
+    map<A>(fn: (value: T) => A): Monad<A, Kind, Name>;
     chain<A>(fn: ((v: T) => Monad<A, Kind, Name>)): Monad<A, Kind, Name>;
 }
 

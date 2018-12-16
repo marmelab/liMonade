@@ -1,40 +1,35 @@
 import createCompose from './Compose';
 import { Left, Right } from './Either';
 import Identity from './Identity';
+import List from './List';
 import { Just } from './Maybe';
 import Applicative from './types/Applicative';
 
-describe('Identity', () => {
+describe('List', () => {
     const increment = (v: number) => v + 1;
     const double = (v: number) => v * 2;
     const identity = (v: any) => v;
-    const doubleIdentity = (v: number) => Identity.of(v).map(double);
-    const incrementIdentity = (v: number) => Identity.of(v).map(increment);
+    const doubleList = (v: number) => List.of(v).map(double);
+    const incrementList = (v: number) => List.of(v).map(increment);
 
     it('.map should compose function', () => {
         expect(
-            Identity.of(5)
+            List.of(5)
                 .map(double)
                 .map(increment),
-        ).toEqual(Identity.of(5).map(v => increment(double(v))));
+        ).toEqual(List.of(5).map(v => increment(double(v))));
     });
 
     it('.map should do nothing if applying the identity function', () => {
-        expect(Identity.of('value').map(identity)).toEqual(
-            Identity.of('value'),
-        );
+        expect(List.of('value').map(identity)).toEqual(List.of('value'));
     });
 
     it('.chain should be associative', () => {
         expect(
-            Identity.of(5)
-                .chain(doubleIdentity)
-                .chain(incrementIdentity),
-        ).toEqual(
-            Identity.of(5).chain(v =>
-                doubleIdentity(v).chain(incrementIdentity),
-            ),
-        );
+            List.of(5)
+                .chain(doubleList)
+                .chain(incrementList),
+        ).toEqual(List.of(5).chain(v => doubleList(v).chain(incrementList)));
     });
 
     it('.chain should follow the Right identity law', () => {
@@ -42,39 +37,33 @@ describe('Identity', () => {
     });
 
     it('.chain should follow the Left identity law', () => {
-        expect(Identity.of(5).chain(incrementIdentity)).toEqual(
-            incrementIdentity(5),
-        );
+        expect(List.of(5).chain(incrementList)).toEqual(incrementList(5));
     });
 
     describe('Applicative Functor Law', () => {
         it('Identity', () => {
-            expect(Identity.of(identity).ap(Identity.of(5))).toEqual(
-                Identity.of(5),
-            );
+            expect(List.of(identity).ap(List.of(5))).toEqual(List.of(5));
         });
 
         it('Homomorphism', () => {
-            expect(Identity.of(double).ap(Identity.of(5))).toEqual(
-                Identity.of(double(5)),
-            );
+            expect(List.of(double).ap(List.of(5))).toEqual(List.of(double(5)));
         });
 
         it('Interchange', () => {
-            expect(Identity.of(double).ap(Identity.of(5))).toEqual(
-                Identity.of(5).map(double),
+            expect(List.of(double).ap(List.of(5))).toEqual(
+                List.of(5).map(double),
             );
         });
 
         it('composition', () => {
-            const u = Identity.of(() => 'u');
-            const v = Identity.of((value: string) => value + 'v');
-            const w = Identity.of('w');
+            const u = List.of(() => 'u');
+            const v = List.of((value: string) => value + 'v');
+            const w = List.of('w');
             const compose = (f1: (v: any) => any) => (f2: (v: any) => any) => (
                 value: any,
             ) => f1(f2(value));
             expect(u.ap(v.ap(w))).toEqual(
-                Identity.of(compose)
+                List.of(compose)
                     .ap(u)
                     .ap(v)
                     .ap(w),
@@ -84,24 +73,24 @@ describe('Identity', () => {
     describe('Traversable Law', () => {
         it('Identity', async () => {
             await expect(
-                Identity.of('value')
+                List.of('value')
                     .map(Identity.of)
                     .sequence(Identity.of),
-            ).toEqual(Identity.of(Identity.of('value')));
+            ).toEqual(Identity.of(List.of('value')));
         });
 
         it('Composition', async () => {
-            const Compose = createCompose(Right, Identity);
+            const Compose = createCompose(Right, List);
             expect(
-                Identity.of(Right.of(Identity.of(true)))
+                Identity.of(Right.of(List.of(true)))
                     .map(v => new Compose(v))
                     .sequence(Compose.of),
             ).toEqual(
-                new Compose(
-                    Identity.of(Right.of(Identity.of(true)))
-                        .sequence(Right.of)
-                        .map(v => v.sequence(Identity.of)),
-                ),
+                new Compose(Identity.of(Right.of(List.of(true)))
+                    .sequence(Right.of)
+                    .map(v =>
+                        v.sequence(List.of),
+                    ) as Right<List<Identity<boolean>>>),
             );
         });
 
@@ -120,9 +109,9 @@ describe('Identity', () => {
                     : Right.of(maybe.flatten());
             }
 
-            const a = Identity.of(Just.of('value')).sequence(Just.of);
+            const a = List.of(Just.of('value')).sequence(Just.of);
             expect(maybeToEither(a)).toEqual(
-                Identity.of(Just.of('value'))
+                List.of(Just.of('value'))
                     .map(maybeToEither)
                     .sequence(Right.of),
             );

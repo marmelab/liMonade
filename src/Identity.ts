@@ -30,14 +30,10 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
         {},
         fn: (v: T) => Applicative<A, N, K>,
     ): Applicative<Identity<A>, N, K> {
-        const appli = fn(this.value);
-        return appli.map<Identity<A>>(Identity.of);
+        return fn(this.value).map<Identity<A>>(Identity.of);
     }
-    public sequence<A, N, K>(this: Identity<Applicative<A, N, K>>, {}) {
-        return this.traverse(
-            Identity.of,
-            (v: Applicative<A, N, K>): Applicative<A, N, K> => v,
-        );
+    public sequence<A, N, K>(this: Identity<Applicative<A, N, K>>, of: {}) {
+        return this.traverse(of, v => v);
     }
 }
 

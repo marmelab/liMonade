@@ -1,8 +1,21 @@
-class List<T> {
-    // Allow to put a single value in a List
+import { Applicative, Monad, Traversable } from './types/Applicative';
+
+const swap = <A, N, K, T>(fn: (v: T) => Applicative<A, N, K>) => (
+    traversable: Applicative<List<A>, N, K>,
+    applicative: T,
+) =>
+    fn(applicative)
+        .map(v => (w: List<A>) => {
+            return w.concat(v);
+        })
+        .ap(traversable);
+
+class List<T> implements Traversable<T, 'List'>, Monad<T, 'List'> {
     public static of<A>(value: A): List<A> {
         return new List([value]);
     }
+    public readonly name: 'List';
+    public readonly kind: 'List';
     private readonly values: ReadonlyArray<T>;
     constructor(values: ReadonlyArray<T>) {
         this.values = values;
@@ -13,17 +26,12 @@ class List<T> {
     public concat(x: T): List<T> {
         return new List(this.values.concat(x));
     }
-    // Same as Array.map but without access to index and array
-    public map<B>(fn: (v: T) => B): List<B> {
+
+    public map<A>(fn: (v: T) => A): List<A> {
         return new List(this.values.map(v => fn(v)));
     }
-    /**
-     * Convert a List(List(values)) into a List(value)
-     * List([List([1]), List([2,3])]) => List([1 ,2 ,3])
-     * @this List([List(values), ...])
-     * @return List(values)
-     */
-    public flatten<A>(): List<A> {
+
+    public flatten<A>(this: List<List<A>>): List<A> {
         const values = (this.values as any) as Array<List<A>>;
         return new List(
             values.reduce(
@@ -32,40 +40,28 @@ class List<T> {
             ),
         );
     }
-    /**
-     * Map a function to the values in the List then flatten the result
-     * @param: A function returning a List
-     * @return List(values)
-     */
+
     public chain<A>(fn: (v: T) => List<A>): List<A> {
         return this.map(fn).flatten();
     }
-    /**
-     * Applicative method
-     * Allow to apply values to functions contained in List
-     */
-    public ap<A, B>(other: List<A>): List<B> {
+
+    public ap<A, B>(this: List<(v: A) => B>, other: List<A>): List<B> {
         return this.chain((fn: ((v: A) => B) & T): List<B> => other.map(fn));
     }
-    /**
-     * Traversable method
-     * Convert a List(Applicative) into an Applicative(List) while transforming the applicative
-     * @this being A List holding Applicatives `List(Applicative)`
-     * @param of the applicative constructor
-     * @param fn the transformation being applied to the applicative
-     * @return Applicative(List)
-     */
-    public traverse(of: (v: any) => any, fn: (v: any) => any) {
+
+    public traverse<A, N, K>(
+        of: (v: List<A>) => Applicative<List<A>, N, K>,
+        fn: (v: T) => Applicative<A, N, K>,
+    ): Applicative<List<A>, N, K> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
-    /**
-     * Traversable method
-     * Convert a List(Applicative) into an Applicative(List)
-     * @this being A List holding Applicatives: `List(Applicative)`
-     * @param of the applicative constructor
-     * @return Applicative(List)
-     */
-    public sequence(of: any) {
-        return this.traverse(of, (v: any) => v);
+
+    public sequence<A, N, K>(
+        this: List<Applicative<A, N, K>>,
+        of: (v: List<A>) => Applicative<List<A>, N, K>,
+    ) {
+        return this.traverse(of, v => v);
     }
-};
+}
+
+export default List;

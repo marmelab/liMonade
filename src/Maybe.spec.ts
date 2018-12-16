@@ -90,7 +90,7 @@ describe('Maybe', () => {
                 Nothing.of()
                     .map(double)
                     .map(increment),
-            ).toEqual(Nothing.of().map(v => increment(double(v))));
+            ).toEqual(Nothing.of().map((v: number) => increment(double(v))));
         });
 
         it('.map should do nothing if applying the identity function', () => {
@@ -103,7 +103,7 @@ describe('Maybe', () => {
                     .chain(doubleIdentity)
                     .chain(incrementNothing),
             ).toEqual(
-                Nothing.of().chain(v =>
+                Nothing.of().chain((v: number) =>
                     doubleIdentity(v).chain(incrementNothing),
                 ),
             );
