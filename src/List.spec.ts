@@ -70,6 +70,7 @@ describe('List', () => {
             );
         });
     });
+
     describe('Traversable Law', () => {
         it('Identity', async () => {
             await expect(
