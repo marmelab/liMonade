@@ -1,4 +1,4 @@
-import { Applicative, Monad } from './types/Applicative';
+import { Applicative, Monad, Traversable } from './types/Applicative';
 
 type nothing = undefined | null;
 
@@ -7,7 +7,7 @@ const isNothing = (value: any): value is nothing => {
 };
 
 export class Just<T>
-    implements Applicative<T, 'Maybe', 'Just'>, Monad<T, 'Maybe', 'Just'> {
+    implements Traversable<T, 'Maybe', 'Just'>, Monad<T, 'Maybe', 'Just'> {
     public static of<A>(value: A): Just<A> {
         return new Just(value);
     }
@@ -55,11 +55,20 @@ export class Just<T>
     public getOrElse<A>(this: Just<T>, {}): A | T {
         return this.value;
     }
+    public traverse<A, N, K>(
+        {},
+        fn: (v: T) => Applicative<A, N, K>,
+    ): Applicative<Just<A>, N, K> {
+        return fn(this.value).map<Just<A>>(Just.of);
+    }
+    public sequence<A, N, K>(this: Just<Applicative<A, N, K>>, of: {}) {
+        return this.traverse(of, v => v);
+    }
 }
 
 export class Nothing
     implements
-        Applicative<never, 'Maybe', 'Nothing'>,
+        Traversable<never, 'Maybe', 'Nothing'>,
         Monad<never, 'Maybe', 'Nothing'> {
     public static of(_?: any) {
         return new Nothing();
@@ -84,5 +93,16 @@ export class Nothing
     }
     public ap({}): Nothing {
         return this;
+    }
+    public traverse<N, K>(
+        of: (v: Nothing) => Applicative<Nothing, N, K>,
+        {},
+    ): Applicative<Nothing, N, K> {
+        return of(this);
+    }
+    public sequence<N, K>(
+        of: (v: Nothing) => Applicative<Nothing, N, K>,
+    ): Applicative<Nothing, N, K> {
+        return this.traverse(of, {});
     }
 }

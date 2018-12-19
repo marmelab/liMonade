@@ -1,4 +1,8 @@
+import createCompose from './Compose';
+import { Left, Right } from './Either';
+import Identity from './Identity';
 import { Just, Nothing } from './Maybe';
+import { Applicative } from './types/Applicative';
 
 describe('Maybe', () => {
     describe('Just', () => {
@@ -73,6 +77,54 @@ describe('Maybe', () => {
                         .ap(v)
                         .ap(w),
                 );
+            });
+
+            describe('Traversable Law', () => {
+                it('Identity', async () => {
+                    await expect(
+                        Just.of('value')
+                            .map(Identity.of)
+                            .sequence(Identity.of),
+                    ).toEqual(Identity.of(Just.of('value')));
+                });
+
+                it('Composition', async () => {
+                    const Compose = createCompose(Right, Just);
+                    expect(
+                        Identity.of(Right.of(Just.of(true)))
+                            .map(v => new Compose(v))
+                            .sequence(Compose.of),
+                    ).toEqual(
+                        new Compose(Identity.of(Right.of(Just.of(true)))
+                            .sequence(Right.of)
+                            .map(v =>
+                                v.sequence(Just.of),
+                            ) as Right<Just<Identity<boolean>>>),
+                    );
+                });
+
+                it('Naturality', () => {
+                    function maybeToEither<T>(
+                        maybe: Applicative<null, 'Maybe', 'Just' | 'Nothing'>,
+                    ): Left<'no value'>;
+                    function maybeToEither<T>(
+                        maybe: Applicative<T, 'Maybe', 'Just'>,
+                    ): Right<T>;
+                    function maybeToEither<T>(
+                        maybe: Just<T> | Just<null>,
+                    ): Right<T> | Left<string> {
+                        return maybe.isNothing()
+                            ? Left.of('no value')
+                            : Right.of(maybe.flatten());
+                    }
+
+                    const a = Just.of(Just.of('value')).sequence(Just.of);
+                    expect(maybeToEither(a)).toEqual(
+                        Just.of(Just.of('value'))
+                            .map(maybeToEither)
+                            .sequence(Right.of),
+                    );
+                });
             });
         });
     });
