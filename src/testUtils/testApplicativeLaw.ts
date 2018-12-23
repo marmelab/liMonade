@@ -1,4 +1,4 @@
-import { Applicative } from '../types/Applicative';
+import { Applicative } from '../types';
 
 interface ApplicativeConstructor<Kind, Name> {
     of<T>(v: T): Applicative<T, Kind, Name>;

@@ -1,4 +1,4 @@
-import { Applicative, Monad, Traversable } from './types/Applicative';
+import { Applicative, Monad, Traversable } from './types';
 
 type nothing = undefined | null;
 

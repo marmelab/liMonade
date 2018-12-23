@@ -1,4 +1,4 @@
-import { Applicative, Monad, Traversable } from './types/Applicative';
+import { Applicative, Monad, Traversable } from './types';
 
 class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     public static of<X>(value: X): Identity<X> {

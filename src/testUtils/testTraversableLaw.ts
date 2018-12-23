@@ -2,7 +2,7 @@ import createCompose from '../Compose';
 import { Left, Right } from '../Either';
 import Identity from '../Identity';
 import { Just } from '../Maybe';
-import { Applicative, Traversable } from '../types/Applicative';
+import { Applicative, Traversable } from '../types';
 
 interface TraversableConstructor<Kind> {
     of<T>(v: T): Traversable<T, Kind>;

@@ -31,5 +31,3 @@ export interface Traversable<T, Kind, Name = Kind>
     ): Applicative<Traversable<A, Kind, Name>, N, K>;
     sequence<A, N, K = N>({}): Applicative<Traversable<A, Kind, Name>, N, K>;
 }
-
-export default Applicative;

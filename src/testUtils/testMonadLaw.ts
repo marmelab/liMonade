@@ -1,4 +1,4 @@
-import { Monad } from '../types/Applicative';
+import { Monad } from '../types';
 
 interface MonadConstructor<Kind, Name> {
     of<T>(v: T): Monad<T, Kind, Name>;

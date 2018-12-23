@@ -1,4 +1,4 @@
-import { Applicative } from './types/Applicative';
+import { Applicative } from './types';
 
 export interface Pointed<Kind> {
     of<T>(v: T): Applicative<T, Kind, Kind>;

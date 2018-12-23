@@ -1,4 +1,4 @@
-import { Applicative, Monad, Traversable } from './types/Applicative';
+import { Applicative, Monad, Traversable } from './types';
 
 export class Right<T>
     implements Traversable<T, 'Either', 'Right'>, Monad<T, 'Either', 'Right'> {

@@ -1,4 +1,4 @@
-import { Functor } from '../types/Applicative';
+import { Functor } from '../types';
 
 const identity = <T>(v: T) => v;
 const increment = (v: number) => v + 1;
