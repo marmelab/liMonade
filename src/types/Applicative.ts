@@ -20,6 +20,11 @@ export interface Monad<T, Kind, Name = Kind> extends Functor<T, Kind, Name> {
 
 export interface Traversable<T, Kind, Name = Kind>
     extends Applicative<T, Kind, Name> {
+    map<A>(fn: (value: T) => A): Traversable<A, Kind, Name>;
+    ap<A, B>(
+        this: Traversable<(v: A) => B, Kind, any>,
+        v: Traversable<A, Kind, any>,
+    ): Traversable<B, Kind, any>;
     traverse<A, N, K = N>(
         {},
         fn: (v: T) => Applicative<A, N, K>,
