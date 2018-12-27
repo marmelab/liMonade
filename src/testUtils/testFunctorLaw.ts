@@ -10,19 +10,24 @@ interface FunctorConstructor<Kind, Name> {
 
 export const testFunctorLaw = <Kind, Name>(
     Testee: FunctorConstructor<Kind, Name>,
+    getValue: (v: any) => any = v => v,
 ) => {
     describe('Functor Laws', () => {
         it('Composition', () => {
             expect(
-                Testee.of(5)
-                    .map(double)
-                    .map(increment),
-            ).toEqual(Testee.of(5).map((v: number) => increment(double(v))));
+                getValue(
+                    Testee.of(5)
+                        .map(double)
+                        .map(increment),
+                ),
+            ).toEqual(
+                getValue(Testee.of(5).map((v: number) => increment(double(v)))),
+            );
         });
 
         it('Identity', () => {
-            expect(Testee.of('value').map(identity)).toEqual(
-                Testee.of('value'),
+            expect(getValue(Testee.of('value').map(identity))).toEqual(
+                getValue(Testee.of('value')),
             );
         });
     });

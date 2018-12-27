@@ -8,25 +8,33 @@ interface TraversableConstructor<Kind> {
     of<T>(v: T): Traversable<T, Kind>;
 }
 
+const expectTraversableEquality = <T, Kind, Name>(
+    a1: Applicative<T, Kind, Name>,
+    a2: Applicative<T, Kind, Name>,
+) => {
+    expect(a1).toEqual(a2);
+};
+
 export const testTraversableLaw = <Kind>(
     Testee: TraversableConstructor<Kind>,
+    expectEquality = expectTraversableEquality,
 ) => {
     describe('Traversable Law', () => {
-        it('Identity', async () => {
-            await expect(
+        it('Identity', () => {
+            expectEquality(
                 Testee.of('value')
                     .map(Identity.of)
                     .sequence(Identity.of),
-            ).toEqual(Identity.of(Testee.of('value')));
+                Identity.of(Testee.of('value')),
+            );
         });
 
         it('Composition', async () => {
             const Compose = createCompose(Right, Testee);
-            expect(
+            expectEquality(
                 Identity.of(Right.of(Testee.of(true)))
                     .map(v => new Compose(v))
                     .sequence(Compose.of),
-            ).toEqual(
                 new Compose(
                     Identity.of(Right.of(Testee.of(true)))
                         .sequence(Right.of)
@@ -53,7 +61,8 @@ export const testTraversableLaw = <Kind>(
             const a = Testee.of(Just.of('value')).sequence(Just.of) as Just<
                 Traversable<string, Kind, Kind>
             >;
-            expect(maybeToEither(a)).toEqual(
+            expectEquality(
+                maybeToEither(a),
                 Testee.of(Just.of('value'))
                     .map(maybeToEither)
                     .sequence(Right.of),

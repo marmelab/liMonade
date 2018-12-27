@@ -6,7 +6,7 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     }
     public readonly name: 'Identity';
     public readonly kind: 'Identity';
-    public readonly value: T;
+    private readonly value: T;
     constructor(value: T) {
         this.value = value;
         this.name = 'Identity';
@@ -14,8 +14,8 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     public map<A>(fn: (v: T) => A): Identity<A> {
         return Identity.of(fn(this.value));
     }
-    public flatten(): T {
-        return this.value;
+    public flatten<A>(this: Identity<Identity<A>>): Identity<A> {
+        return Identity.of(this.value.value);
     }
     public chain<A>(fn: ((v: T) => Identity<A>)): Identity<A> {
         return this.map(fn).flatten();

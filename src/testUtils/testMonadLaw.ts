@@ -6,6 +6,7 @@ interface MonadConstructor<Kind, Name> {
 
 export const testMonadLaw = <Kind, Name>(
     Testee: MonadConstructor<Kind, Name>,
+    getValue: (v: any) => any = v => v,
 ) => {
     const increment = (v: number) => v + 1;
     const double = (v: number) => v * 2;
@@ -15,20 +16,28 @@ export const testMonadLaw = <Kind, Name>(
     describe('Monad Laws', () => {
         it('.chain should be associative', () => {
             expect(
-                Testee.of(5)
-                    .chain(doubleList)
-                    .chain(incrementList),
+                getValue(
+                    Testee.of(5)
+                        .chain(doubleList)
+                        .chain(incrementList),
+                ),
             ).toEqual(
-                Testee.of(5).chain(v => doubleList(v).chain(incrementList)),
+                getValue(
+                    Testee.of(5).chain(v => doubleList(v).chain(incrementList)),
+                ),
             );
         });
 
         it('.chain should follow the Right identity law', () => {
-            expect(Testee.of(5).chain(Testee.of)).toEqual(Testee.of(5));
+            expect(getValue(Testee.of(5).chain(Testee.of))).toEqual(
+                getValue(Testee.of(5)),
+            );
         });
 
         it('.chain should follow the Left identity law', () => {
-            expect(Testee.of(5).chain(incrementList)).toEqual(incrementList(5));
+            expect(getValue(Testee.of(5).chain(incrementList))).toEqual(
+                getValue(incrementList(5)),
+            );
         });
     });
 };
