@@ -5,7 +5,7 @@ import { testMonadLaw } from './testUtils/testMonadLaw';
 
 const getIOValue = <T>(io: IO<T>) => io.computation();
 
-describe.only('IO', () => {
+describe('IO', () => {
     testFunctorLaw(IO, getIOValue);
     testMonadLaw(IO, getIOValue);
     testApplicativeLaw(IO, getIOValue);
