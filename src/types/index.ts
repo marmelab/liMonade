@@ -8,9 +8,9 @@ export interface Applicative<T, Kind, Name = Kind>
     extends Functor<T, Kind, Name> {
     map<A>(fn: (value: T) => A): Applicative<A, Kind, Name>;
     ap<A, B>(
-        this: Applicative<(v: A) => B, Kind, any>,
-        v: Applicative<A, Kind, any>,
-    ): Applicative<B, Kind, any>;
+        this: Applicative<(v: A) => B, Kind, Name>,
+        v: Applicative<A, Kind, Name>,
+    ): Applicative<B, Kind, Name>;
 }
 
 export interface Monad<T, Kind, Name = Kind> extends Functor<T, Kind, Name> {
@@ -22,9 +22,9 @@ export interface Traversable<T, Kind, Name = Kind>
     extends Applicative<T, Kind, Name> {
     map<A>(fn: (value: T) => A): Traversable<A, Kind, Name>;
     ap<A, B>(
-        this: Traversable<(v: A) => B, Kind, any>,
-        v: Traversable<A, Kind, any>,
-    ): Traversable<B, Kind, any>;
+        this: Traversable<(v: A) => B, Kind, Name>,
+        v: Traversable<A, Kind, Name>,
+    ): Traversable<B, Kind, Name>;
     traverse<A, N, K = N>(
         {},
         fn: (v: T) => Applicative<A, N, K>,

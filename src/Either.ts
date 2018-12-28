@@ -11,6 +11,12 @@ export class Right<T>
     constructor(value: T) {
         this.value = value;
     }
+    public isLeft(): this is Left<T> {
+        return false;
+    }
+    public isRight(): this is Right<T> {
+        return true;
+    }
     public map<A>(fn: (v: T) => A): Right<A> {
         return new Right(fn(this.value));
     }
@@ -22,10 +28,18 @@ export class Right<T>
     public chain<A>(fn: (v: T) => Right<A> | Left<A>): Right<A> | Left<A> {
         return this.map(fn).flatten();
     }
-    public ap<A, B>(this: Right<(v: A) => B>, other: Right<A>): Right<B> {
-        return this.map(fn => fn(other.flatten()));
+    public ap<A, B>(this: Right<(v: A) => B>, other: Right<A>): Right<B>;
+    public ap<A, B, C>(this: Right<(v: A) => B>, other: Left<C>): Left<C>;
+    public ap<A, B, C>(
+        this: Right<(v: A) => B>,
+        other: Right<A> | Left<C>,
+    ): Right<B> | Left<C> {
+        if (other.isLeft()) {
+            return other;
+        }
+        return other.map(this.value);
     }
-    public catch(): Right<T> {
+    public catch({}): Right<T> {
         return this;
     }
     public traverse<A, N, K>(
@@ -50,6 +64,12 @@ export class Left<T>
     constructor(value: T) {
         this.value = value;
     }
+    public isLeft(): this is Left<T> {
+        return true;
+    }
+    public isRight(): this is Right<T> {
+        return false;
+    }
     public map({}): Left<T> {
         return this;
     }
@@ -62,8 +82,8 @@ export class Left<T>
     public ap({}): Left<T> {
         return this;
     }
-    public catch(): Right<T> {
-        return Right.of(this.value);
+    public catch<A>(fn: (v: T) => A): Right<A> {
+        return Right.of(fn(this.value));
     }
     public traverse<N, K>(
         of: (v: Left<T>) => Applicative<Left<T>, N, K>,
