@@ -13,21 +13,23 @@ export const testFunctorLaw = <Kind, Name>(
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Functor Laws', () => {
-        it('Composition', () => {
+        it('Composition', async () => {
             expect(
-                getValue(
+                await getValue(
                     Testee.of(5)
                         .map(double)
                         .map(increment),
                 ),
             ).toEqual(
-                getValue(Testee.of(5).map((v: number) => increment(double(v)))),
+                await getValue(
+                    Testee.of(5).map((v: number) => increment(double(v))),
+                ),
             );
         });
 
-        it('Identity', () => {
-            expect(getValue(Testee.of('value').map(identity))).toEqual(
-                getValue(Testee.of('value')),
+        it('Identity', async () => {
+            expect(await getValue(Testee.of('value').map(identity))).toEqual(
+                await getValue(Testee.of('value')),
             );
         });
     });

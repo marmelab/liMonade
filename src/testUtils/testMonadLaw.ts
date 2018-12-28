@@ -14,29 +14,29 @@ export const testMonadLaw = <Kind, Name>(
     const incrementList = (v: number) => Testee.of(v).map(increment);
 
     describe('Monad Laws', () => {
-        it('.chain should be associative', () => {
+        it('.chain should be associative', async () => {
             expect(
-                getValue(
+                await getValue(
                     Testee.of(5)
                         .chain(doubleList)
                         .chain(incrementList),
                 ),
             ).toEqual(
-                getValue(
+                await getValue(
                     Testee.of(5).chain(v => doubleList(v).chain(incrementList)),
                 ),
             );
         });
 
-        it('.chain should follow the Right identity law', () => {
-            expect(getValue(Testee.of(5).chain(Testee.of))).toEqual(
-                getValue(Testee.of(5)),
+        it('.chain should follow the Right identity law', async () => {
+            expect(await getValue(Testee.of(5).chain(Testee.of))).toEqual(
+                await getValue(Testee.of(5)),
             );
         });
 
-        it('.chain should follow the Left identity law', () => {
-            expect(getValue(Testee.of(5).chain(incrementList))).toEqual(
-                getValue(incrementList(5)),
+        it('.chain should follow the Left identity law', async () => {
+            expect(await getValue(Testee.of(5).chain(incrementList))).toEqual(
+                await getValue(incrementList(5)),
             );
         });
     });
