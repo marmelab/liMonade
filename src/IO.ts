@@ -4,6 +4,9 @@ class IO<T> implements Applicative<T, 'IO'>, Monad<T, 'IO'> {
     public static of<X>(value: X): IO<X> {
         return new IO(() => value);
     }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => IO<B> {
+        return v => IO.of(fn(v));
+    }
     public readonly name: 'IO';
     public readonly kind: 'IO';
     public readonly computation: () => T;

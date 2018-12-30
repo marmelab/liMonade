@@ -5,8 +5,8 @@ export default class Writer<T>
     public static of<T>(value: T): Writer<T> {
         return new Writer(value, []);
     }
-    public static lift(fn: (...v: any[]) => any) {
-        return (...args: any[]) => Writer.of(fn(...args));
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => Writer<B> {
+        return v => Writer.of(fn(v));
     }
     public readonly name: 'Writer';
     public readonly kind: 'Writer';

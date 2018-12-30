@@ -11,6 +11,17 @@ export class Just<T>
     public static of<A>(value: A): Just<A> {
         return new Just(value);
     }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => Just<B> | Nothing {
+        return v => {
+            const value = fn(v);
+
+            if (isNothing(value)) {
+                return new Nothing();
+            }
+
+            return new Just(value);
+        };
+    }
     public readonly value: T;
     public readonly kind: 'Maybe';
     public readonly name: 'Just';
@@ -72,6 +83,17 @@ export class Nothing
         Monad<never, 'Maybe', 'Nothing'> {
     public static of(_?: any) {
         return new Nothing();
+    }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => Just<B> | Nothing {
+        return v => {
+            const value = fn(v);
+
+            if (isNothing(value)) {
+                return new Nothing();
+            }
+
+            return new Just(value);
+        };
     }
     public readonly value: never;
     public readonly kind: 'Maybe';

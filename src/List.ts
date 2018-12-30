@@ -14,6 +14,9 @@ class List<T> implements Traversable<T, 'List'>, Monad<T, 'List'> {
     public static of<A>(value: A): List<A> {
         return new List([value]);
     }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => List<B> {
+        return v => List.of(fn(v));
+    }
     public readonly name: 'List';
     public readonly kind: 'List';
     private readonly values: ReadonlyArray<T>;

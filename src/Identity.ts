@@ -4,6 +4,9 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     public static of<X>(value: X): Identity<X> {
         return new Identity(value);
     }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => Identity<B> {
+        return v => new Identity(fn(v));
+    }
     public readonly name: 'Identity';
     public readonly kind: 'Identity';
     private readonly value: T;

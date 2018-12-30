@@ -5,6 +5,17 @@ export class Right<T>
     public static of<A>(value: A): Right<A> {
         return new Right(value);
     }
+    public static lift<A, B>(
+        fn: (v: A) => B,
+    ): (v: A) => Right<B> | Left<Error> {
+        return v => {
+            try {
+                return new Right(fn(v));
+            } catch (error) {
+                return new Left(error);
+            }
+        };
+    }
     public kind: 'Either';
     public name: 'Right';
     public readonly value: T;
@@ -57,6 +68,17 @@ export class Left<T>
     implements Traversable<T, 'Either', 'Left'>, Monad<T, 'Either', 'Left'> {
     public static of<A>(value: A): Left<A> {
         return new Left(value);
+    }
+    public static lift<A, B>(
+        fn: (v: A) => B,
+    ): (v: A) => Right<B> | Left<Error> {
+        return v => {
+            try {
+                return new Right(fn(v));
+            } catch (error) {
+                return new Left(error);
+            }
+        };
     }
     public kind: 'Either';
     public name: 'Left';

@@ -7,6 +7,9 @@ class Reader<T, D> implements Applicative<T, 'Reader'>, Monad<T, 'Reader'> {
     public static ask<X>(): Reader<X, X> {
         return new Reader(v => v);
     }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => Reader<B, any> {
+        return v => Reader.of(fn(v));
+    }
     public readonly name: 'Reader';
     public readonly kind: 'Reader';
     public readonly computation: (v: D) => T;

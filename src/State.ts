@@ -4,7 +4,9 @@ class State<T, S> implements Applicative<T, 'State'>, Monad<T, 'State'> {
     public static of<X, Y>(value: X): State<X, Y> {
         return new State((state: Y) => ({ value, state }));
     }
-
+    public static lift<A, B, C>(fn: (v: A) => B): (v: A) => State<B, C> {
+        return v => State.of(fn(v));
+    }
     public static getState<A>(): State<A, A> {
         return new State(state => ({ value: state, state }));
     }

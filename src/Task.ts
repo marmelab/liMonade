@@ -4,6 +4,9 @@ class Task<T> implements Applicative<T, 'Task'>, Monad<T, 'Task'> {
     public static of<X>(value: X): Task<X> {
         return new Task((resolve, _) => resolve(value));
     }
+    public static lift<A, B>(fn: (v: A) => B): (v: A) => Task<B> {
+        return v => Task.of(fn(v));
+    }
     public readonly name: 'Task';
     public readonly kind: 'Task';
     public readonly cps: (
