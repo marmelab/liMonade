@@ -15,10 +15,10 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
         this.name = 'Identity';
     }
     public map<A>(fn: (v: T) => A): Identity<A> {
-        return Identity.of(fn(this.value));
+        return new Identity(fn(this.value));
     }
     public flatten<A>(this: Identity<Identity<A>>): Identity<A> {
-        return Identity.of(this.value.value);
+        return new Identity(this.value.value);
     }
     public chain<A>(fn: ((v: T) => Identity<A>)): Identity<A> {
         return this.map(fn).flatten();

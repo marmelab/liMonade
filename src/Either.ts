@@ -1,3 +1,4 @@
+import { Just, Nothing } from './Maybe';
 import { Applicative, Monad, Traversable } from './types';
 
 export class Right<T>
@@ -105,7 +106,7 @@ export class Left<T>
         return this;
     }
     public catch<A>(fn: (v: T) => A): Right<A> {
-        return Right.of(fn(this.value));
+        return new Right(fn(this.value));
     }
     public traverse<N, K>(
         of: (v: Left<T>) => Applicative<Left<T>, N, K>,
@@ -118,4 +119,16 @@ export class Left<T>
     ): Applicative<Left<T>, N, K> {
         return this.traverse(of, {});
     }
+}
+
+export function eitherToMaybe<A>(either: Right<A>): Just<A>;
+export function eitherToMaybe<A>(either: Left<A>): Nothing;
+export function eitherToMaybe<A>(
+    either: Right<A> | Left<A>,
+): Just<A> | Nothing {
+    if (either.isRight()) {
+        return new Just(either.flatten());
+    }
+
+    return new Nothing();
 }
