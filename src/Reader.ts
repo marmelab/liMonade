@@ -2,7 +2,7 @@ import { Applicative, Monad } from './types';
 
 class Reader<Value, Dependencies>
     implements Applicative<Value, 'Reader'>, Monad<Value, 'Reader'> {
-    public static of<A>(value: A): Reader<A, any> {
+    public static of<Value>(value: Value): Reader<Value, any> {
         return new Reader(() => value);
     }
     public static ask<A>(): Reader<A, A> {

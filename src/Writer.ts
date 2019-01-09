@@ -2,7 +2,7 @@ import { Applicative, Monad } from './types';
 
 export default class Writer<Value>
     implements Applicative<Value, 'Writer'>, Monad<Value, 'Writer'> {
-    public static of<A>(value: A): Writer<A> {
+    public static of<Value>(value: Value): Writer<Value> {
         return new Writer(value, []);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Writer<B> {

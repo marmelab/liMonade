@@ -1,7 +1,7 @@
 import { Applicative, Monad } from './types';
 
 class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
-    public static of<X>(value: X): Task<X> {
+    public static of<Value>(value: Value): Task<Value> {
         return new Task((resolve, _) => resolve(value));
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Task<B> {

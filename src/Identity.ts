@@ -2,7 +2,7 @@ import { Applicative, Monad, Traversable } from './types';
 
 class Identity<Value>
     implements Traversable<Value, 'Identity'>, Monad<Value, 'Identity'> {
-    public static of<X>(value: X): Identity<X> {
+    public static of<Value>(value: Value): Identity<Value> {
         return new Identity(value);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Identity<B> {

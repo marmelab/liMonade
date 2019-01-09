@@ -1,7 +1,7 @@
 import { Applicative, Monad } from './types';
 
 class IO<Value> implements Applicative<Value, 'IO'>, Monad<Value, 'IO'> {
-    public static of<A>(value: A): IO<A> {
+    public static of<Value>(value: Value): IO<Value> {
         return new IO(() => value);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => IO<B> {

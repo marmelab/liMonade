@@ -6,7 +6,7 @@ export class Right<Value>
     implements
         Traversable<Value, 'Either', 'Right'>,
         Monad<Value, 'Either', 'Right'> {
-    public static of<A>(value: A): Right<A> {
+    public static of<Value>(value: Value): Right<Value> {
         return new Right(value);
     }
     public static lift<A, B>(

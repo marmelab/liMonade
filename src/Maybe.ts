@@ -11,7 +11,7 @@ export class Just<Value>
     implements
         Traversable<Value, 'Maybe', 'Just'>,
         Monad<Value, 'Maybe', 'Just'> {
-    public static of<A>(value: A): Just<A> {
+    public static of<Value>(value: Value): Just<Value> {
         return new Just(value);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Just<B> | Nothing {

@@ -2,8 +2,8 @@ import { Applicative, Monad } from './types';
 
 class State<Value, Status>
     implements Applicative<Value, 'State'>, Monad<Value, 'State'> {
-    public static of<X, Y>(value: X): State<X, Y> {
-        return new State((state: Y) => ({ value, state }));
+    public static of<Value, Status>(value: Value): State<Value, Status> {
+        return new State((state: Status) => ({ value, state }));
     }
     public static lift<A, B, C>(fn: (v: A) => B): (v: A) => State<B, C> {
         return v => State.of(fn(v));

@@ -11,7 +11,7 @@ const swap = <A, N, K, T>(fn: (v: T) => Applicative<A, N, K>) => (
         .ap(traversable);
 
 class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
-    public static of<A>(value: A): List<A> {
+    public static of<Value>(value: Value): List<Value> {
         return new List([value]);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => List<B> {
