@@ -7,6 +7,15 @@ export interface Functor<Value, Kind, Name = Kind> {
     ): Functor<B, Kind, Name>;
 }
 
+export interface Monad<Value, Kind, Name = Kind>
+    extends Functor<Value, Kind, Name> {
+    map<A, B>(
+        this: Monad<A, Kind, Name>,
+        fn: (value: A) => B,
+    ): Monad<B, Kind, Name>;
+    chain<A>(fn: ((v: Value) => Monad<A, Kind, Name>)): Monad<A, Kind, Name>;
+}
+
 export interface Applicative<Value, Kind, Name = Kind>
     extends Functor<Value, Kind, Name> {
     map<A, B>(
@@ -17,15 +26,6 @@ export interface Applicative<Value, Kind, Name = Kind>
         this: Applicative<(v: A) => B, Kind, Name>,
         v: Applicative<A, Kind, Name>,
     ): Applicative<B, Kind, Name>;
-}
-
-export interface Monad<Value, Kind, Name = Kind>
-    extends Functor<Value, Kind, Name> {
-    map<A, B>(
-        this: Monad<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Monad<B, Kind, Name>;
-    chain<A>(fn: ((v: Value) => Monad<A, Kind, Name>)): Monad<A, Kind, Name>;
 }
 
 export interface Traversable<Value, Kind, Name = Kind>

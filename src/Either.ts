@@ -1,6 +1,7 @@
 import { Just, Nothing } from './Maybe';
 import { Applicative, Monad, Traversable } from './types';
 
+// TODO: refactor in a single Either class.
 export class Right<Value>
     implements
         Traversable<Value, 'Either', 'Right'>,

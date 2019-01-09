@@ -6,6 +6,7 @@ const isNothing = (value: any): value is nothing => {
     return value === null || typeof value === 'undefined';
 };
 
+// TODO: Refactor in a single Maybe class
 export class Just<Value>
     implements
         Traversable<Value, 'Maybe', 'Just'>,
