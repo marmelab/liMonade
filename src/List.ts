@@ -1,7 +1,7 @@
 import { Applicative, Monad, Traversable } from './types';
 
-const swap = <A, N, K, T>(fn: (v: T) => Applicative<A, N, K>) => (
-    traversable: Applicative<List<A>, N, K>,
+const swap = <A, K, N, T>(fn: (v: T) => Applicative<A, K, N>) => (
+    traversable: Applicative<List<A>, K, N>,
     applicative: T,
 ) =>
     fn(applicative)

@@ -1,4 +1,4 @@
-import { Just, Nothing } from './Maybe';
+import Maybe, { nothing } from './Maybe';
 import { Applicative, Monad, Traversable } from './types';
 
 // TODO: refactor in a single Either class.
@@ -129,10 +129,10 @@ export class Left<Value>
     }
 }
 
-export function eitherToMaybe<A>(either: Right<A>): Just<A>;
-export function eitherToMaybe<A>(either: Left<A>): Nothing;
+export function eitherToMaybe<A>(either: Right<A>): Maybe<A>;
+export function eitherToMaybe<A>(either: Left<A>): Maybe<nothing>;
 export function eitherToMaybe<A>(
     either: Right<A> | Left<A>,
-): Just<A> | Nothing {
-    return either.isRight() ? new Just(either.flatten()) : new Nothing();
+): Maybe<A> | Maybe<nothing> {
+    return either.isRight() ? new Maybe(either.flatten()) : new Maybe(null);
 }

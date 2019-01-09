@@ -1,7 +1,7 @@
 import createCompose from '../Compose';
 import { Left, Right } from '../Either';
 import Identity from '../Identity';
-import { Just } from '../Maybe';
+import Maybe from '../Maybe';
 import { Applicative, Traversable } from '../types';
 
 interface TraversableConstructor<Kind> {
@@ -36,7 +36,9 @@ export const testTraversableLaw = <Kind>(
                     new Compose(
                         Identity.of(Right.of(Testee.of(true)))
                             .sequence(Right.of)
-                            .map(v => v.sequence(Testee.of)),
+                            .map((v: Identity<Right<{}>>) =>
+                                v.sequence(Testee.of),
+                            ),
                     ),
                 ),
             );
@@ -44,25 +46,25 @@ export const testTraversableLaw = <Kind>(
 
         it('Naturality', async () => {
             function maybeToEither<T>(
-                maybe: Applicative<null, 'Maybe', 'Just' | 'Nothing'>,
+                maybe: Applicative<null, 'Maybe', 'Maybe'>,
             ): Left<'no value'>;
             function maybeToEither<T>(
-                maybe: Applicative<T, 'Maybe', 'Just'>,
+                maybe: Applicative<T, 'Maybe', 'Maybe'>,
             ): Right<T>;
             function maybeToEither<T>(
-                maybe: Just<T> | Just<null>,
+                maybe: Maybe<T> | Maybe<null>,
             ): Right<T> | Left<string> {
                 return maybe.isNothing()
                     ? Left.of('no value')
                     : Right.of(maybe.flatten());
             }
 
-            const a = Testee.of(Just.of('value')).sequence(Just.of) as Just<
+            const a = Testee.of(Maybe.of('value')).sequence(Maybe.of) as Maybe<
                 Traversable<string, Kind, Kind>
             >;
             expect(await getValue(maybeToEither(a))).toEqual(
                 await getValue(
-                    Testee.of(Just.of('value'))
+                    Testee.of(Maybe.of('value'))
                         .map(maybeToEither)
                         .sequence(Right.of),
                 ),

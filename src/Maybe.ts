@@ -1,136 +1,98 @@
 import { Applicative, Monad, Traversable } from './types';
 
-type nothing = undefined | null;
+export type nothing = undefined | null;
 
-const isNothing = (value: any): value is nothing => {
-    return value === null || typeof value === 'undefined';
-};
-
-// TODO: Refactor in a single Maybe class
-export class Just<Value>
+class Maybe<Value>
     implements
-        Traversable<Value, 'Maybe', 'Just'>,
-        Monad<Value, 'Maybe', 'Just'> {
-    public static of<Value>(value: Value): Just<Value> {
-        return new Just(value);
+        Traversable<Value, 'Maybe', 'Maybe'>,
+        Monad<Value, 'Maybe', 'Maybe'> {
+    public static of<Value>(value: Value): Maybe<Value> {
+        return new Maybe(value);
     }
-    public static lift<A, B>(fn: (v: A) => B): (v: A) => Just<B> | Nothing {
-        return v => {
-            const value = fn(v);
-
-            return isNothing(value) ? new Nothing() : new Just(value);
-        };
+    public static lift<A, B>(
+        fn: (v: A) => B,
+    ): (v: A) => Maybe<B> | Maybe<never> {
+        return v => new Maybe(fn(v));
     }
     public readonly value: Value;
     public readonly kind: 'Maybe';
-    public readonly name: 'Just';
+    public readonly name: 'Maybe';
     constructor(value: Value) {
         this.value = value;
     }
-    public isNothing(): this is Just<Value & nothing> {
+    public isNothing(): this is Maybe<nothing> {
         return this.value === null || typeof this.value === 'undefined';
     }
-    public isJust(): this is Applicative<NonNullable<Value>, 'Maybe', 'Just'> {
-        return this.value !== null && typeof this.value !== 'undefined';
-    }
-    public map<A, B>(this: Just<A>, fn: (v: A) => B): Just<B>;
-    public map<A, B>(this: Just<A>, fn: (v: A) => nothing): Nothing;
+    public map<A, B>(this: Maybe<A>, fn: (v: A) => B): Maybe<B>;
+    public map<A, B>(this: Maybe<nothing>, fn: (v: A) => B): Maybe<nothing>;
     public map<A, B>(
-        this: Just<A>,
-        fn: ((v: A) => B) | ((v: A) => nothing),
-    ): Just<B> | Nothing {
-        const newValue = fn(this.value);
-        return isNothing(newValue) ? new Nothing() : new Just(newValue);
+        this: Maybe<A>,
+        fn: ((v: A) => B),
+    ): Maybe<B> | Maybe<nothing> {
+        return this.isNothing() ? this : new Maybe(fn(this.value));
     }
     public flatten(): Value {
         return this.value;
     }
+    public chain<A, B>(this: Maybe<A>, fn: (v: A) => Maybe<B>): Maybe<B>;
     public chain<A, B>(
-        this: Just<NonNullable<A>>,
-        fn: (v: A) => Just<B>,
-    ): Just<B>;
-    public chain<A>(this: Just<NonNullable<A>>, fn: (v: A) => Nothing): Nothing;
+        this: Maybe<nothing>,
+        fn: (v: A) => Maybe<B>,
+    ): Maybe<nothing>;
     public chain<A, B>(
-        this: Just<A>,
-        fn: (v: A) => Nothing | Just<NonNullable<B>>,
-    ): Nothing;
-    public chain<A, B>(
-        this: Just<A>,
-        fn: (v: A) => Just<B> | Nothing,
-    ): Just<B> | Nothing {
-        return this.map(fn).flatten();
+        this: Maybe<A | nothing>,
+        fn: (v: A) => Maybe<B>,
+    ): Maybe<B | nothing> {
+        return this.isNothing() ? this : this.map(fn).flatten();
     }
-    public ap<A, B>(this: Just<(v: A) => B>, other: Just<A>): Just<B>;
-    public ap<A, B>(this: Just<(v: A) => B>, other: Nothing): Nothing;
+    public ap<A, B>(this: Maybe<(v: A) => B>, other: Maybe<A>): Maybe<B>;
     public ap<A, B>(
-        this: Just<(v: A) => B>,
-        other: Just<A> | Nothing,
-    ): Just<B> | Nothing {
-        return other.isNothing()
-            ? new Nothing()
-            : this.map(fn => fn(other.flatten()));
+        this: Maybe<nothing>,
+        other: Maybe<A> | Maybe<nothing>,
+    ): Maybe<nothing>;
+    public ap<A, B>(
+        this: Maybe<(v: A) => B> | Maybe<nothing>,
+        other: Maybe<nothing>,
+    ): Maybe<nothing>;
+    public ap<A, B>(
+        this: Maybe<(v: A) => B> | Maybe<nothing>,
+        other: Maybe<A> | Maybe<nothing>,
+    ): Maybe<B> | Maybe<nothing> {
+        if (this.isNothing()) {
+            return this;
+        }
+
+        if (other.isNothing()) {
+            return other;
+        }
+        return this.map(fn => fn(other.flatten()));
     }
     public getOrElse<A>(_: A): Value {
         return this.value;
     }
-    public traverse<A, B, N, K>(
-        this: Just<A>,
-        _: (v: any) => any,
-        fn: (v: A) => Applicative<B, N, K>,
-    ): Applicative<Just<B>, N, K> {
-        return fn(this.value).map(Just.of);
+    public traverse<A, B, K, N>(
+        this: Maybe<A>,
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, K, N>,
+        fn: (v: A) => Applicative<B, K, N>,
+    ): Applicative<Maybe<B>, K, N>;
+    public traverse<A, B, K, N>(
+        this: Maybe<nothing>,
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, K, N>,
+        fn: (v: A) => Applicative<B, K, N>,
+    ): Applicative<Maybe<nothing>, K, N>;
+    public traverse<A, B, K, N>(
+        this: Maybe<A> | Maybe<nothing>,
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, K, N>,
+        fn: (v: A) => Applicative<B, K, N>,
+    ): Applicative<Maybe<B>, K, N> | Applicative<Maybe<nothing>, K, N> {
+        return this.isNothing() ? of(this) : fn(this.value).map(Maybe.of);
     }
-    public sequence<A, N, K>(
-        this: Just<Applicative<A, N, K>>,
+    public sequence<A, K, N>(
+        this: Maybe<Applicative<A, K, N>>,
         of: (v: any) => any,
     ) {
         return this.traverse(of, v => v);
     }
 }
 
-export class Nothing
-    implements
-        Traversable<never, 'Maybe', 'Nothing'>,
-        Monad<never, 'Maybe', 'Nothing'> {
-    public static of(_?: any) {
-        return new Nothing();
-    }
-    public static lift<A, B>(fn: (v: A) => B): (v: A) => Just<B> | Nothing {
-        return v => {
-            const value = fn(v);
-
-            return isNothing(value) ? new Nothing() : new Just(value);
-        };
-    }
-    public readonly kind: 'Maybe';
-    public readonly name: 'Nothing';
-    public isNothing(): this is Nothing {
-        return true;
-    }
-    public isJust(): this is Just<NonNullable<any>> {
-        return false;
-    }
-    public map(_: (v: any) => any): Nothing {
-        return this;
-    }
-    public flatten(): Nothing {
-        return this;
-    }
-    public chain(_: (v: never) => any): Nothing {
-        return this;
-    }
-    public ap(_: any): Nothing {
-        return this;
-    }
-    public traverse<K, N>(
-        of: (v: Nothing) => Applicative<Nothing, K, N>,
-        _: (v: any) => any,
-    ): Applicative<Nothing, K, N> {
-        return of(this);
-    }
-    public sequence<K, N>(
-        of: (v: Nothing) => Applicative<Nothing, K, N>,
-    ): Applicative<Nothing, K, N> {
-        return this.traverse(of, (v: any) => v);
-    }
-}
+export default Maybe;
