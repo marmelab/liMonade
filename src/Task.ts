@@ -11,7 +11,7 @@ class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
     public readonly kind: 'Task';
     public readonly cps: (
         resolve: (v: Value) => void,
-        reject: (v: Error) => void,
+        reject?: (v: Error) => void,
     ) => void;
     constructor(
         cps: (resolve: (v: Value) => void, reject: (v: Error) => void) => void,
@@ -29,7 +29,7 @@ class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
             }, reject);
         });
     }
-    public then(resolve: (v: Value) => void, reject: (e: Error) => void) {
+    public then(resolve: (v: Value) => void, reject?: (e: Error) => void) {
         return this.cps(resolve, reject);
     }
     public toPromise() {
