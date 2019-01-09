@@ -12,14 +12,14 @@ class State<Value, Status>
         return new State(state => ({ value: state, state }));
     }
     public static save<A>(newState: A): State<undefined, A> {
-        return new State(({}) => ({ value: undefined, state: newState }));
+        return new State((_: any) => ({ value: undefined, state: newState }));
     }
     public static update<A>(f: (v: A) => A): State<undefined, A> {
         return State.getState<A>().chain((state: A) => {
             return State.save(f(state));
         });
     }
-    public static getStateAndUpdate<A>(f: (v: A) => A): State<A, {}> {
+    public static getStateAndUpdate<A>(f: (v: A) => A): State<A, any> {
         return State.getState().chain((state: A) => State.of(f(state)));
     }
     public readonly name: 'State';

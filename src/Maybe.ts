@@ -73,17 +73,20 @@ export class Just<Value>
             ? new Nothing()
             : this.map(fn => fn(other.flatten()));
     }
-    public getOrElse<A>(this: Just<Value>, value: A): Value;
-    public getOrElse<A>(this: Just<Value>, {}): A | Value {
+    public getOrElse<A>(_: A): Value {
         return this.value;
     }
-    public traverse<A, N, K>(
-        {},
-        fn: (v: Value) => Applicative<A, N, K>,
-    ): Applicative<Just<A>, N, K> {
+    public traverse<A, B, N, K>(
+        this: Just<A>,
+        _: (v: any) => any,
+        fn: (v: A) => Applicative<B, N, K>,
+    ): Applicative<Just<B>, N, K> {
         return fn(this.value).map(Just.of);
     }
-    public sequence<A, N, K>(this: Just<Applicative<A, N, K>>, of: {}) {
+    public sequence<A, N, K>(
+        this: Just<Applicative<A, N, K>>,
+        of: (v: any) => any,
+    ) {
         return this.traverse(of, v => v);
     }
 }
@@ -106,7 +109,6 @@ export class Nothing
             return new Just(value);
         };
     }
-    public readonly value: never;
     public readonly kind: 'Maybe';
     public readonly name: 'Nothing';
     public isNothing(): this is Nothing {
@@ -115,27 +117,27 @@ export class Nothing
     public isJust(): this is Just<NonNullable<any>> {
         return false;
     }
-    public map({}): Nothing {
+    public map(_: (v: any) => any): Nothing {
         return this;
     }
     public flatten(): Nothing {
         return this;
     }
-    public chain({}): Nothing {
+    public chain(_: (v: never) => any): Nothing {
         return this;
     }
-    public ap({}): Nothing {
+    public ap(_: any): Nothing {
         return this;
     }
     public traverse<K, N>(
         of: (v: Nothing) => Applicative<Nothing, K, N>,
-        {},
+        _: (v: any) => any,
     ): Applicative<Nothing, K, N> {
         return of(this);
     }
     public sequence<K, N>(
         of: (v: Nothing) => Applicative<Nothing, K, N>,
     ): Applicative<Nothing, K, N> {
-        return this.traverse(of, {});
+        return this.traverse(of, (v: any) => v);
     }
 }

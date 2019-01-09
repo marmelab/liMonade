@@ -38,9 +38,17 @@ export interface Traversable<Value, Kind, Name = Kind>
         this: Traversable<(v: A) => B, Kind, Name>,
         v: Traversable<A, Kind, Name>,
     ): Traversable<B, Kind, Name>;
-    traverse<A, K, N = K>(
-        {},
-        fn: (v: Value) => Applicative<A, K, N>,
+    traverse<A, B, K, N = K>(
+        this: Traversable<A, Kind, Name>,
+        of: (
+            v: Traversable<A, Kind, Name>,
+        ) => Applicative<Traversable<A, Kind, Name>, K, N>,
+        fn: (v: A) => Applicative<B, K, N>,
     ): Applicative<Traversable<A, Kind, Name>, K, N>;
-    sequence<A, K, N = K>({}): Applicative<Traversable<A, Kind, Name>, K, N>;
+    sequence<A, K, N = K>(
+        this: Traversable<Applicative<A, K, N>, Kind, Name>,
+        of: (
+            v: Traversable<A, Kind, Name>,
+        ) => Applicative<Traversable<A, Kind, Name>, K, N>,
+    ): Applicative<Traversable<A, Kind, Name>, K, N>;
 }

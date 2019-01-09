@@ -54,18 +54,16 @@ class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
         );
     }
 
-    public traverse<A, K, N>(
+    public traverse<A, B, K, N>(
+        this: List<A>,
         of: (v: List<A>) => Applicative<List<A>, K, N>,
-        fn: (v: Value) => Applicative<A, K, N>,
-    ): Applicative<List<A>, K, N> {
+        fn: (v: A) => Applicative<B, K, N>,
+    ): Applicative<List<B>, K, N> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
 
-    public sequence<A, K, N>(
-        this: List<Applicative<A, K, N>>,
-        of: (v: List<A>) => Applicative<List<A>, K, N>,
-    ) {
-        return this.traverse(of, v => v);
+    public sequence<A, K, N>(this: List<Applicative<A, K, N>>, of: any) {
+        return this.traverse(of, (v: Applicative<A, K, N>) => v);
     }
 }
 

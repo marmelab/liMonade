@@ -14,14 +14,14 @@ describe('Task', () => {
     it('should allow to chain async operation lazily', async () => {
         const double = jest.fn(
             (v: number) =>
-                new Task<number>((resolve: (v: number) => void, {}) => {
+                new Task<number>((resolve: (v: number) => void, _) => {
                     setTimeout(() => resolve(v * 2), 1);
                 }),
         );
 
         const increment = jest.fn(
             (v: number) =>
-                new Task<number>((resolve: (v: number) => void, {}) => {
+                new Task<number>((resolve: (v: number) => void, _) => {
                     setTimeout(() => resolve(v + 1), 1);
                 }),
         );
@@ -41,14 +41,14 @@ describe('Task', () => {
     it('should ignore operation after the task has been rejected', async () => {
         const boom = jest.fn(
             () =>
-                new Task(({}, reject) => {
+                new Task((_, reject) => {
                     setTimeout(() => reject(new Error('Boom')), 1);
                 }),
         );
 
         const double = jest.fn(
             (v: number) =>
-                new Task<number>((resolve: (v: number) => void, {}) => {
+                new Task<number>((resolve: (v: number) => void, _) => {
                     setTimeout(() => resolve(v * 2), 1);
                 }),
         );
@@ -69,14 +69,14 @@ describe('Task', () => {
     it('should allow to resume operation with catch', async () => {
         const boom = jest.fn(
             () =>
-                new Task(({}, reject) => {
+                new Task((_, reject) => {
                     setTimeout(() => reject(new Error('Boom')), 1);
                 }),
         );
 
         const double = jest.fn(
             (v: number) =>
-                new Task<number>((resolve: (v: number) => void, {}) => {
+                new Task<number>((resolve: (v: number) => void, _) => {
                     setTimeout(() => resolve(v * 2), 1);
                 }),
         );
@@ -96,9 +96,9 @@ describe('Task', () => {
     });
 
     it('list should allow to convert a list of Task into a single task of a list and execute all computation simultaneously', async () => {
-        const fn1 = jest.fn((resolve, {}) => setTimeout(() => resolve(1), 1));
-        const fn2 = jest.fn((resolve, {}) => setTimeout(() => resolve(2), 2));
-        const fn3 = jest.fn((resolve, {}) => setTimeout(() => resolve(3), 3));
+        const fn1 = jest.fn((resolve, _) => setTimeout(() => resolve(1), 1));
+        const fn2 = jest.fn((resolve, _) => setTimeout(() => resolve(2), 2));
+        const fn3 = jest.fn((resolve, _) => setTimeout(() => resolve(3), 3));
         const list = new List([new Task(fn1), new Task(fn2), new Task(fn3)]);
 
         const io = list.sequence(Task.of) as Task<List<number>>;

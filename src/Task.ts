@@ -36,8 +36,14 @@ class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
         return new Promise(this.then.bind(this));
     }
     public catch<A>(fn: (v: Error) => A) {
-        return new Task((resolve, {}) =>
-            this.cps(resolve, error => resolve(fn(error))),
+        return new Task((resolve, reject) =>
+            this.cps(resolve, error => {
+                try {
+                    return resolve(fn(error));
+                } catch (err) {
+                    reject(err);
+                }
+            }),
         );
     }
     public flatten<A>(this: Task<Task<A>>): Task<A> {

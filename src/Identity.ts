@@ -30,13 +30,17 @@ class Identity<Value>
     ): Identity<B> {
         return this.chain(fn => other.map(fn));
     }
-    public traverse<A, K, N>(
-        {},
-        fn: (v: Value) => Applicative<A, K, N>,
-    ): Applicative<Identity<A>, K, N> {
+    public traverse<A, B, K, N>(
+        this: Identity<A>,
+        _: (v: any) => any,
+        fn: (v: A) => Applicative<B, K, N>,
+    ): Applicative<Identity<B>, K, N> {
         return fn(this.value).map(Identity.of);
     }
-    public sequence<A, K, N>(this: Identity<Applicative<A, K, N>>, of: {}) {
+    public sequence<A, K, N>(
+        this: Identity<Applicative<A, K, N>>,
+        of: (v: any) => any,
+    ) {
         return this.traverse(of, v => v);
     }
 }

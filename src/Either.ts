@@ -53,16 +53,20 @@ export class Right<Value>
         }
         return other.map(this.value);
     }
-    public catch({}): Right<Value> {
+    public catch(_: (v: any) => any): Right<Value> {
         return this;
     }
-    public traverse<A, K, N>(
-        {},
-        fn: (v: Value) => Applicative<A, K, N>,
+    public traverse<A, B, K, N>(
+        this: Right<A>,
+        _: (v: any) => any,
+        fn: (v: A) => Applicative<B, K, N>,
     ): Applicative<Right<A>, K, N> {
         return fn(this.value).map(Right.of);
     }
-    public sequence<A, K, N>(this: Right<Applicative<A, K, N>>, of: {}) {
+    public sequence<A, K, N>(
+        this: Right<Applicative<A, K, N>>,
+        of: (v: any) => any,
+    ) {
         return this.traverse(of, v => v);
     }
 }
@@ -97,31 +101,33 @@ export class Left<Value>
     public isRight(): this is Right<Value> {
         return false;
     }
-    public map({}): Left<Value> {
+    public map(_: (v: any) => any): Left<Value> {
         return this;
     }
     public flatten(): Left<Value> {
         return this;
     }
-    public chain({}): Left<Value> {
+    public chain(_: (v: any) => any): Left<Value> {
         return this;
     }
-    public ap({}): Left<Value> {
+    public ap(_: any): Left<Value> {
         return this;
     }
     public catch<A>(fn: (v: Value) => A): Right<A> {
         return new Right(fn(this.value));
     }
-    public traverse<K, N>(
-        of: (v: Left<Value>) => Applicative<Left<Value>, K, N>,
-        {},
-    ): Applicative<Left<Value>, K, N> {
+    public traverse<A, K, N>(
+        this: Left<A>,
+        of: (v: Left<A>) => Applicative<Left<A>, K, N>,
+        _: (v: any) => any,
+    ): Applicative<Left<A>, K, N> {
         return of(this);
     }
-    public sequence<K, N>(
-        of: (v: Left<Value>) => Applicative<Left<Value>, K, N>,
-    ): Applicative<Left<Value>, K, N> {
-        return this.traverse(of, {});
+    public sequence<A, K, N>(
+        this: Left<A>,
+        of: (v: Left<A>) => Applicative<Left<A>, K, N>,
+    ): Applicative<Left<A>, K, N> {
+        return of(this);
     }
 }
 
