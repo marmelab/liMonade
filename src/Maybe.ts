@@ -18,11 +18,7 @@ export class Just<Value>
         return v => {
             const value = fn(v);
 
-            if (isNothing(value)) {
-                return new Nothing();
-            }
-
-            return new Just(value);
+            return isNothing(value) ? new Nothing() : new Just(value);
         };
     }
     public readonly value: Value;
@@ -103,11 +99,7 @@ export class Nothing
         return v => {
             const value = fn(v);
 
-            if (isNothing(value)) {
-                return new Nothing();
-            }
-
-            return new Just(value);
+            return isNothing(value) ? new Nothing() : new Just(value);
         };
     }
     public readonly kind: 'Maybe';

@@ -49,10 +49,7 @@ export class Right<Value>
         this: Right<(v: A) => B>,
         other: Right<A> | Left<C>,
     ): Right<B> | Left<C> {
-        if (other.isLeft()) {
-            return other;
-        }
-        return other.map(this.value);
+        return other.isLeft() ? other : other.map(this.value);
     }
     public catch(_: (v: any) => any): Right<Value> {
         return this;
@@ -137,9 +134,5 @@ export function eitherToMaybe<A>(either: Left<A>): Nothing;
 export function eitherToMaybe<A>(
     either: Right<A> | Left<A>,
 ): Just<A> | Nothing {
-    if (either.isRight()) {
-        return new Just(either.flatten());
-    }
-
-    return new Nothing();
+    return either.isRight() ? new Just(either.flatten()) : new Nothing();
 }
