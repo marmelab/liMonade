@@ -10,7 +10,7 @@ const swap = <A, N, K, T>(fn: (v: T) => Applicative<A, N, K>) => (
         })
         .ap(traversable);
 
-class List<T> implements Traversable<T, 'List'>, Monad<T, 'List'> {
+class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
     public static of<A>(value: A): List<A> {
         return new List([value]);
     }
@@ -19,18 +19,18 @@ class List<T> implements Traversable<T, 'List'>, Monad<T, 'List'> {
     }
     public readonly name: 'List';
     public readonly kind: 'List';
-    private readonly values: ReadonlyArray<T>;
-    constructor(values: ReadonlyArray<T>) {
+    private readonly values: ReadonlyArray<Value>;
+    constructor(values: ReadonlyArray<Value>) {
         this.values = values;
     }
-    public toArray(): ReadonlyArray<T> {
+    public toArray(): ReadonlyArray<Value> {
         return this.values;
     }
-    public concat(x: T): List<T> {
+    public concat(x: Value): List<Value> {
         return new List(this.values.concat(x));
     }
 
-    public map<A>(fn: (v: T) => A): List<A> {
+    public map<A, B>(this: List<A>, fn: (v: A) => B): List<B> {
         return new List(this.values.map(v => fn(v)));
     }
 
@@ -44,24 +44,26 @@ class List<T> implements Traversable<T, 'List'>, Monad<T, 'List'> {
         );
     }
 
-    public chain<A>(fn: (v: T) => List<A>): List<A> {
+    public chain<A, B>(this: List<A>, fn: (v: A) => List<B>): List<B> {
         return this.map(fn).flatten();
     }
 
     public ap<A, B>(this: List<(v: A) => B>, other: List<A>): List<B> {
-        return this.chain((fn: ((v: A) => B) & T): List<B> => other.map(fn));
+        return this.chain(
+            (fn: ((v: A) => B) & Value): List<B> => other.map(fn),
+        );
     }
 
-    public traverse<A, N, K>(
-        of: (v: List<A>) => Applicative<List<A>, N, K>,
-        fn: (v: T) => Applicative<A, N, K>,
-    ): Applicative<List<A>, N, K> {
+    public traverse<A, K, N>(
+        of: (v: List<A>) => Applicative<List<A>, K, N>,
+        fn: (v: Value) => Applicative<A, K, N>,
+    ): Applicative<List<A>, K, N> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
 
-    public sequence<A, N, K>(
-        this: List<Applicative<A, N, K>>,
-        of: (v: List<A>) => Applicative<List<A>, N, K>,
+    public sequence<A, K, N>(
+        this: List<Applicative<A, K, N>>,
+        of: (v: List<A>) => Applicative<List<A>, K, N>,
     ) {
         return this.traverse(of, v => v);
     }

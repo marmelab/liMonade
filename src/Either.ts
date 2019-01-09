@@ -1,8 +1,10 @@
 import { Just, Nothing } from './Maybe';
 import { Applicative, Monad, Traversable } from './types';
 
-export class Right<T>
-    implements Traversable<T, 'Either', 'Right'>, Monad<T, 'Either', 'Right'> {
+export class Right<Value>
+    implements
+        Traversable<Value, 'Either', 'Right'>,
+        Monad<Value, 'Either', 'Right'> {
     public static of<A>(value: A): Right<A> {
         return new Right(value);
     }
@@ -19,25 +21,25 @@ export class Right<T>
     }
     public kind: 'Either';
     public name: 'Right';
-    public readonly value: T;
-    constructor(value: T) {
+    public readonly value: Value;
+    constructor(value: Value) {
         this.value = value;
     }
-    public isLeft(): this is Left<T> {
+    public isLeft(): this is Left<Value> {
         return false;
     }
-    public isRight(): this is Right<T> {
+    public isRight(): this is Right<Value> {
         return true;
     }
-    public map<A>(fn: (v: T) => A): Right<A> {
+    public map<A, B>(this: Right<A>, fn: (v: A) => B): Right<B> {
         return new Right(fn(this.value));
     }
     public flatten() {
         return this.value;
     }
-    public chain<A>(fn: (v: T) => Right<A>): Right<A>;
-    public chain<A>(fn: (v: T) => Left<A>): Left<A>;
-    public chain<A>(fn: (v: T) => Right<A> | Left<A>): Right<A> | Left<A> {
+    public chain<A>(fn: (v: Value) => Right<A>): Right<A>;
+    public chain<A>(fn: (v: Value) => Left<A>): Left<A>;
+    public chain<A>(fn: (v: Value) => Right<A> | Left<A>): Right<A> | Left<A> {
         return this.map(fn).flatten();
     }
     public ap<A, B>(this: Right<(v: A) => B>, other: Right<A>): Right<B>;
@@ -51,22 +53,24 @@ export class Right<T>
         }
         return other.map(this.value);
     }
-    public catch({}): Right<T> {
+    public catch({}): Right<Value> {
         return this;
     }
-    public traverse<A, N, K>(
+    public traverse<A, K, N>(
         {},
-        fn: (v: T) => Applicative<A, N, K>,
-    ): Applicative<Right<A>, N, K> {
-        return fn(this.value).map<Right<A>>(Right.of);
+        fn: (v: Value) => Applicative<A, K, N>,
+    ): Applicative<Right<A>, K, N> {
+        return fn(this.value).map(Right.of);
     }
-    public sequence<A, N, K>(this: Right<Applicative<A, N, K>>, of: {}) {
+    public sequence<A, K, N>(this: Right<Applicative<A, K, N>>, of: {}) {
         return this.traverse(of, v => v);
     }
 }
 
-export class Left<T>
-    implements Traversable<T, 'Either', 'Left'>, Monad<T, 'Either', 'Left'> {
+export class Left<Value>
+    implements
+        Traversable<Value, 'Either', 'Left'>,
+        Monad<Value, 'Either', 'Left'> {
     public static of<A>(value: A): Left<A> {
         return new Left(value);
     }
@@ -83,40 +87,40 @@ export class Left<T>
     }
     public kind: 'Either';
     public name: 'Left';
-    public readonly value: T;
-    constructor(value: T) {
+    public readonly value: Value;
+    constructor(value: Value) {
         this.value = value;
     }
-    public isLeft(): this is Left<T> {
+    public isLeft(): this is Left<Value> {
         return true;
     }
-    public isRight(): this is Right<T> {
+    public isRight(): this is Right<Value> {
         return false;
     }
-    public map({}): Left<T> {
+    public map({}): Left<Value> {
         return this;
     }
-    public flatten(): Left<T> {
+    public flatten(): Left<Value> {
         return this;
     }
-    public chain({}): Left<T> {
+    public chain({}): Left<Value> {
         return this;
     }
-    public ap({}): Left<T> {
+    public ap({}): Left<Value> {
         return this;
     }
-    public catch<A>(fn: (v: T) => A): Right<A> {
+    public catch<A>(fn: (v: Value) => A): Right<A> {
         return new Right(fn(this.value));
     }
-    public traverse<N, K>(
-        of: (v: Left<T>) => Applicative<Left<T>, N, K>,
+    public traverse<K, N>(
+        of: (v: Left<Value>) => Applicative<Left<Value>, K, N>,
         {},
-    ): Applicative<Left<T>, N, K> {
+    ): Applicative<Left<Value>, K, N> {
         return of(this);
     }
-    public sequence<N, K>(
-        of: (v: Left<T>) => Applicative<Left<T>, N, K>,
-    ): Applicative<Left<T>, N, K> {
+    public sequence<K, N>(
+        of: (v: Left<Value>) => Applicative<Left<Value>, K, N>,
+    ): Applicative<Left<Value>, K, N> {
         return this.traverse(of, {});
     }
 }

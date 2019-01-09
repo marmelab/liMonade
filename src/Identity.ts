@@ -1,6 +1,7 @@
 import { Applicative, Monad, Traversable } from './types';
 
-class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
+class Identity<Value>
+    implements Traversable<Value, 'Identity'>, Monad<Value, 'Identity'> {
     public static of<X>(value: X): Identity<X> {
         return new Identity(value);
     }
@@ -9,18 +10,18 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     }
     public readonly name: 'Identity';
     public readonly kind: 'Identity';
-    private readonly value: T;
-    constructor(value: T) {
+    private readonly value: Value;
+    constructor(value: Value) {
         this.value = value;
         this.name = 'Identity';
     }
-    public map<A>(fn: (v: T) => A): Identity<A> {
+    public map<A, B>(this: Identity<A>, fn: (v: A) => B) {
         return new Identity(fn(this.value));
     }
     public flatten<A>(this: Identity<Identity<A>>): Identity<A> {
         return new Identity(this.value.value);
     }
-    public chain<A>(fn: ((v: T) => Identity<A>)): Identity<A> {
+    public chain<A>(fn: ((v: Value) => Identity<A>)): Identity<A> {
         return this.map(fn).flatten();
     }
     public ap<A, B>(
@@ -29,13 +30,13 @@ class Identity<T> implements Traversable<T, 'Identity'>, Monad<T, 'Identity'> {
     ): Identity<B> {
         return this.chain(fn => other.map(fn));
     }
-    public traverse<A, N, K>(
+    public traverse<A, K, N>(
         {},
-        fn: (v: T) => Applicative<A, N, K>,
-    ): Applicative<Identity<A>, N, K> {
-        return fn(this.value).map<Identity<A>>(Identity.of);
+        fn: (v: Value) => Applicative<A, K, N>,
+    ): Applicative<Identity<A>, K, N> {
+        return fn(this.value).map(Identity.of);
     }
-    public sequence<A, N, K>(this: Identity<Applicative<A, N, K>>, of: {}) {
+    public sequence<A, K, N>(this: Identity<Applicative<A, K, N>>, of: {}) {
         return this.traverse(of, v => v);
     }
 }
