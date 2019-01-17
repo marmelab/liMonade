@@ -1,138 +1,118 @@
-import Maybe, { nothing } from './Maybe';
 import { Applicative, Monad, Traversable } from './types';
 
-// TODO: refactor in a single Either class.
-export class Right<Value>
-    implements
-        Traversable<Value, 'Either', 'Right'>,
-        Monad<Value, 'Either', 'Right'> {
-    public static of<Value>(value: Value): Right<Value> {
-        return new Right(value);
+export type Left<Value> = Either<Value, 'Left'>;
+export type Right<Value> = Either<Value, 'Right'>;
+
+class Either<Value, Type extends 'Left' | 'Right'>
+    implements Traversable<Value, 'Either'>, Monad<Value, 'Either'> {
+    public static of<Value>(value: Value): Right<Value>;
+    public static of<Value>(value: Value & Error): Left<Error>;
+    public static of<Value>(
+        value: Value | Value & Error,
+    ): Right<Value> | Left<Error> {
+        return value instanceof Error
+            ? Either.Left(value)
+            : Either.Right(value);
     }
-    public static lift<A, B>(
-        fn: (v: A) => B,
-    ): (v: A) => Right<B> | Left<Error> {
-        return v => {
-            try {
-                return new Right(fn(v));
-            } catch (error) {
-                return new Left(error);
-            }
-        };
+    public static Right<Value>(value: Value): Right<Value> {
+        return new Either(value);
     }
-    public kind: 'Either';
-    public name: 'Right';
+    public static Left(error: Error): Left<Error> {
+        return new Either(error, 'Left');
+    }
     public readonly value: Value;
-    constructor(value: Value) {
+    public readonly name: 'Either';
+    private readonly type: Type;
+    constructor(value: Value, type: Type = 'Right' as Type) {
         this.value = value;
+        this.type = type;
     }
-    public isLeft(): this is Left<Value> {
-        return false;
+    public isLeft(): this is Left<Error> {
+        return this.type === 'Left';
     }
     public isRight(): this is Right<Value> {
-        return true;
+        return this.type === 'Right';
     }
-    public map<A, B>(this: Right<A>, fn: (v: A) => B): Right<B> {
-        return new Right(fn(this.value));
+    public catch<A, B>(this: Right<A>, fn: (v: Error) => B): Right<A>;
+    public catch<A, B>(this: Left<Error>, fn: (v: Error) => B): Right<B>;
+    public catch<A, B>(
+        this: Right<A> | Left<Error>,
+        fn: (v: Error) => B,
+    ): Right<A> | Right<B> {
+        return this.isLeft() ? Either.of(fn(this.value)) : this;
     }
-    public flatten() {
-        return this.value;
+    public map<A, B>(this: Right<A>, fn: (v: A) => B): Right<B>;
+    public map<A, B>(this: Left<Error>, fn: (v: A) => B): Left<Error>;
+    public map<A, B>(
+        this: Right<A> | Left<Error>,
+        fn: (v: A) => B,
+    ): Right<B> | Left<Error> {
+        try {
+            return this.isLeft() ? this : Either.of(fn(this.value));
+        } catch (error) {
+            return Either.Left(error);
+        }
     }
-    public chain<A>(fn: (v: Value) => Right<A>): Right<A>;
-    public chain<A>(fn: (v: Value) => Left<A>): Left<A>;
-    public chain<A>(fn: (v: Value) => Right<A> | Left<A>): Right<A> | Left<A> {
-        return this.map(fn).flatten();
+    public flatten(this: Right<Value>): Value;
+    public flatten(this: Left<Error>): Left<Error>;
+    public flatten(this: Right<Value> | Left<Error>): Value | Left<Error> {
+        return this.isLeft() ? this : this.value;
     }
+    public chain<A, B>(this: Right<A>, fn: (v: A) => Right<B>): Right<B>;
+    public chain<A, B>(this: Right<A>, fn: (v: A) => Left<Error>): Left<Error>;
+    public chain<A, B>(
+        this: Left<Error>,
+        fn: (v: A) => Left<Error> | Right<B>,
+    ): Left<Error>;
+    public chain<A, B>(
+        this: Right<A> | Left<Error>,
+        fn: (v: A) => Right<B> | Left<Error>,
+    ): Right<B> | Left<Error> {
+        return this.isLeft() ? this : this.map(fn).flatten();
+    }
+    public ap<A, B>(this: Left<A>, other: Right<B> | Left<Error>): Left<Error>;
     public ap<A, B>(this: Right<(v: A) => B>, other: Right<A>): Right<B>;
-    public ap<A, B, C>(this: Right<(v: A) => B>, other: Left<C>): Left<C>;
-    public ap<A, B, C>(
-        this: Right<(v: A) => B>,
-        other: Right<A> | Left<C>,
-    ): Right<B> | Left<C> {
+    public ap<A, B>(this: Right<(v: A) => B>, other: Left<Error>): Left<Error>;
+    public ap<A, B>(
+        this: Right<(v: A) => B> | Left<Error>,
+        other: Right<A> | Left<Error>,
+    ): Right<B> | Left<Error> {
+        if (this.isLeft()) {
+            return this;
+        }
         return other.isLeft() ? other : other.map(this.value);
     }
-    public catch(_: (v: any) => any): Right<Value> {
-        return this;
-    }
-    public traverse<A, B, K, N>(
+    public traverse<A, B, N>(
         this: Right<A>,
-        _: (v: any) => any,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Right<A>, K, N> {
-        return fn(this.value).map(Right.of);
+        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Right<A>, N>;
+    public traverse<A, B, N>(
+        this: Left<A>,
+        of: (v: Left<A>) => Applicative<Left<Error>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Left<A>, N>;
+    public traverse<A, B, N>(
+        this: Right<A> | Left<Error>,
+        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Right<A>, N> {
+        return this.isLeft() ? of(this) : fn(this.value).map(Either.of);
     }
-    public sequence<A, K, N>(
-        this: Right<Applicative<A, K, N>>,
+    public sequence<A, N>(
+        this: Right<Applicative<A, N>>,
         of: (v: any) => any,
-    ) {
-        return this.traverse(of, v => v);
+    ): Applicative<Right<A>, N>;
+    public sequence<A, N>(
+        this: Left<Error>,
+        of: (v: any) => any,
+    ): Applicative<Left<Error>, N>;
+    public sequence<A, N>(
+        this: Right<Applicative<A, N>> | Left<Error>,
+        of: (v: any) => any,
+    ): Applicative<Right<A>, N> | Applicative<Left<Error>, N> {
+        return this.isLeft() ? of(this) : this.value.map(Either.of);
     }
 }
 
-export class Left<Value>
-    implements
-        Traversable<Value, 'Either', 'Left'>,
-        Monad<Value, 'Either', 'Left'> {
-    public static of<A>(value: A): Left<A> {
-        return new Left(value);
-    }
-    public static lift<A, B>(
-        fn: (v: A) => B,
-    ): (v: A) => Right<B> | Left<Error> {
-        return v => {
-            try {
-                return new Right(fn(v));
-            } catch (error) {
-                return new Left(error);
-            }
-        };
-    }
-    public kind: 'Either';
-    public name: 'Left';
-    public readonly value: Value;
-    constructor(value: Value) {
-        this.value = value;
-    }
-    public isLeft(): this is Left<Value> {
-        return true;
-    }
-    public isRight(): this is Right<Value> {
-        return false;
-    }
-    public map(_: (v: any) => any): Left<Value> {
-        return this;
-    }
-    public flatten(): Left<Value> {
-        return this;
-    }
-    public chain(_: (v: any) => any): Left<Value> {
-        return this;
-    }
-    public ap(_: any): Left<Value> {
-        return this;
-    }
-    public catch<A>(fn: (v: Value) => A): Right<A> {
-        return new Right(fn(this.value));
-    }
-    public traverse<A, K, N>(
-        this: Left<A>,
-        of: (v: Left<A>) => Applicative<Left<A>, K, N>,
-        _: (v: any) => any,
-    ): Applicative<Left<A>, K, N> {
-        return of(this);
-    }
-    public sequence<A, K, N>(
-        this: Left<A>,
-        of: (v: Left<A>) => Applicative<Left<A>, K, N>,
-    ): Applicative<Left<A>, K, N> {
-        return of(this);
-    }
-}
-
-export function eitherToMaybe<A>(either: Right<A>): Maybe<A>;
-export function eitherToMaybe<A>(either: Left<A>): Maybe<nothing>;
-export function eitherToMaybe<A>(
-    either: Right<A> | Left<A>,
-): Maybe<A> | Maybe<nothing> {
-    return either.isRight() ? new Maybe(either.flatten()) : new Maybe(null);
-}
+export default Either;

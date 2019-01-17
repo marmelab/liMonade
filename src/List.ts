@@ -1,7 +1,7 @@
 import { Applicative, Monad, Traversable } from './types';
 
-const swap = <A, K, N, T>(fn: (v: T) => Applicative<A, K, N>) => (
-    traversable: Applicative<List<A>, K, N>,
+const swap = <A, N, T>(fn: (v: T) => Applicative<A, N>) => (
+    traversable: Applicative<List<A>, N>,
     applicative: T,
 ) =>
     fn(applicative)
@@ -54,16 +54,16 @@ class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
         );
     }
 
-    public traverse<A, B, K, N>(
+    public traverse<A, B, N>(
         this: List<A>,
-        of: (v: List<A>) => Applicative<List<A>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<List<B>, K, N> {
+        of: (v: List<A>) => Applicative<List<A>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<List<B>, N> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
 
-    public sequence<A, K, N>(this: List<Applicative<A, K, N>>, of: any) {
-        return this.traverse(of, (v: Applicative<A, K, N>) => v);
+    public sequence<A, N>(this: List<Applicative<A, N>>, of: any) {
+        return this.traverse(of, (v: Applicative<A, N>) => v);
     }
 }
 

@@ -1,54 +1,40 @@
-export interface Functor<Value, Kind, Name = Kind> {
-    readonly kind: Kind;
+export interface Functor<Value, Name> {
     readonly name: Name;
-    map<A, B>(
-        this: Functor<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Functor<B, Kind, Name>;
+    map<A, B>(this: Functor<A, Name>, fn: (value: A) => B): Functor<B, Name>;
 }
 
-export interface Monad<Value, Kind, Name = Kind>
-    extends Functor<Value, Kind, Name> {
-    map<A, B>(
-        this: Monad<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Monad<B, Kind, Name>;
-    chain<A>(fn: ((v: Value) => Monad<A, Kind, Name>)): Monad<A, Kind, Name>;
+export interface Monad<Value, Name> extends Functor<Value, Name> {
+    map<A, B>(this: Monad<A, Name>, fn: (value: A) => B): Monad<B, Name>;
+    chain<A>(fn: ((v: Value) => Monad<A, Name>)): Monad<A, Name>;
 }
 
-export interface Applicative<Value, Kind, Name = Kind>
-    extends Functor<Value, Kind, Name> {
+export interface Applicative<Value, Name> extends Functor<Value, Name> {
     map<A, B>(
-        this: Applicative<A, Kind, Name>,
+        this: Applicative<A, Name>,
         fn: (value: A) => B,
-    ): Applicative<B, Kind, Name>;
+    ): Applicative<B, Name>;
     ap<A, B>(
-        this: Applicative<(v: A) => B, Kind, Name>,
-        v: Applicative<A, Kind, Name>,
-    ): Applicative<B, Kind, Name>;
+        this: Applicative<(v: A) => B, Name>,
+        v: Applicative<A, Name>,
+    ): Applicative<B, Name>;
 }
 
-export interface Traversable<Value, Kind, Name = Kind>
-    extends Applicative<Value, Kind, Name> {
+export interface Traversable<Value, Name> extends Applicative<Value, Name> {
     map<A, B>(
-        this: Traversable<A, Kind, Name>,
+        this: Traversable<A, Name>,
         fn: (value: A) => B,
-    ): Traversable<B, Kind, Name>;
+    ): Traversable<B, Name>;
     ap<A, B>(
-        this: Traversable<(v: A) => B, Kind, Name>,
-        v: Traversable<A, Kind, Name>,
-    ): Traversable<B, Kind, Name>;
-    traverse<A, B, K, N = K>(
-        this: Traversable<A, Kind, Name>,
-        of: (
-            v: Traversable<A, Kind, Name>,
-        ) => Applicative<Traversable<A, Kind, Name>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Traversable<A, Kind, Name>, K, N>;
-    sequence<A, K, N = K>(
-        this: Traversable<Applicative<A, K, N>, Kind, Name>,
-        of: (
-            v: Traversable<A, Kind, Name>,
-        ) => Applicative<Traversable<A, Kind, Name>, K, N>,
-    ): Applicative<Traversable<A, Kind, Name>, K, N>;
+        this: Traversable<(v: A) => B, Name>,
+        v: Traversable<A, Name>,
+    ): Traversable<B, Name>;
+    traverse<A, B, N>(
+        this: Traversable<A, Name>,
+        of: (v: Traversable<A, Name>) => Applicative<Traversable<A, Name>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Traversable<A, Name>, N>;
+    sequence<A, N>(
+        this: Traversable<Applicative<A, N>, Name>,
+        of: (v: Traversable<A, Name>) => Applicative<Traversable<A, Name>, N>,
+    ): Applicative<Traversable<A, Name>, N>;
 }

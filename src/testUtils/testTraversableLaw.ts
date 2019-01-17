@@ -1,15 +1,15 @@
 import createCompose from '../Compose';
-import { Left, Right } from '../Either';
+import Either, { Left, Right } from '../Either';
 import Identity from '../Identity';
 import Maybe from '../Maybe';
 import { Applicative, Traversable } from '../types';
 
-interface TraversableConstructor<Kind> {
-    of<T>(v: T): Traversable<T, Kind>;
+interface TraversableConstructor<Name> {
+    of<T>(v: T): Traversable<T, Name>;
 }
 
-export const testTraversableLaw = <Kind>(
-    Testee: TraversableConstructor<Kind>,
+export const testTraversableLaw = <Name>(
+    Testee: TraversableConstructor<Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Traversable Law', () => {
@@ -24,18 +24,18 @@ export const testTraversableLaw = <Kind>(
         });
 
         it('Composition', async () => {
-            const Compose = createCompose(Right, Testee);
+            const Compose = createCompose(Either, Testee);
             expect(
                 await getValue(
-                    Identity.of(Right.of(Testee.of(true)))
+                    Identity.of(Either.of(Testee.of(true)))
                         .map(v => new Compose(v))
                         .sequence(Compose.of),
                 ),
             ).toEqual(
                 await getValue(
                     new Compose(
-                        Identity.of(Right.of(Testee.of(true)))
-                            .sequence(Right.of)
+                        Identity.of(Either.of(Testee.of(true)))
+                            .sequence(Either.of)
                             .map((v: Identity<Right<{}>>) =>
                                 v.sequence(Testee.of),
                             ),
@@ -46,27 +46,25 @@ export const testTraversableLaw = <Kind>(
 
         it('Naturality', async () => {
             function maybeToEither<T>(
-                maybe: Applicative<null, 'Maybe', 'Maybe'>,
+                maybe: Applicative<null, 'Maybe'>,
             ): Left<'no value'>;
-            function maybeToEither<T>(
-                maybe: Applicative<T, 'Maybe', 'Maybe'>,
-            ): Right<T>;
+            function maybeToEither<T>(maybe: Applicative<T, 'Maybe'>): Right<T>;
             function maybeToEither<T>(
                 maybe: Maybe<T> | Maybe<null>,
             ): Right<T> | Left<string> {
                 return maybe.isNothing()
-                    ? Left.of('no value')
-                    : Right.of(maybe.flatten());
+                    ? Either.ofError('no value')
+                    : Either.of(maybe.flatten());
             }
 
             const a = Testee.of(Maybe.of('value')).sequence(Maybe.of) as Maybe<
-                Traversable<string, Kind, Kind>
+                Traversable<string, Name>
             >;
             expect(await getValue(maybeToEither(a))).toEqual(
                 await getValue(
                     Testee.of(Maybe.of('value'))
                         .map(maybeToEither)
-                        .sequence(Right.of),
+                        .sequence(Either.of),
                 ),
             );
         });

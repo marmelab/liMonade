@@ -4,12 +4,12 @@ const identity = <T>(v: T) => v;
 const increment = (v: number) => v + 1;
 const double = (v: number) => v * 2;
 
-interface FunctorConstructor<Kind, Name> {
-    of<T>(v: T): Functor<T, Kind, Name>;
+interface FunctorConstructor<Name> {
+    of<T>(v: T): Functor<T, Name>;
 }
 
-export const testFunctorLaw = <Kind, Name>(
-    Testee: FunctorConstructor<Kind, Name>,
+export const testFunctorLaw = <Name>(
+    Testee: FunctorConstructor<Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Functor Laws', () => {

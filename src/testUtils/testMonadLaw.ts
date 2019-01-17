@@ -1,11 +1,11 @@
 import { Monad } from '../types';
 
-interface MonadConstructor<Kind, Name> {
-    of<T>(v: T): Monad<T, Kind, Name>;
+interface MonadConstructor<Name> {
+    of<T>(v: T): Monad<T, Name>;
 }
 
-export const testMonadLaw = <Kind, Name>(
-    Testee: MonadConstructor<Kind, Name>,
+export const testMonadLaw = <Name>(
+    Testee: MonadConstructor<Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     const increment = (v: number) => v + 1;

@@ -3,9 +3,7 @@ import { Applicative, Monad, Traversable } from './types';
 export type nothing = undefined | null;
 
 class Maybe<Value>
-    implements
-        Traversable<Value, 'Maybe', 'Maybe'>,
-        Monad<Value, 'Maybe', 'Maybe'> {
+    implements Traversable<Value, 'Maybe'>, Monad<Value, 'Maybe'> {
     public static of<Value>(value: Value): Maybe<Value> {
         return new Maybe(value);
     }
@@ -15,7 +13,6 @@ class Maybe<Value>
         return v => new Maybe(fn(v));
     }
     public readonly value: Value;
-    public readonly kind: 'Maybe';
     public readonly name: 'Maybe';
     constructor(value: Value) {
         this.value = value;
@@ -70,27 +67,24 @@ class Maybe<Value>
     public getOrElse<A>(_: A): Value {
         return this.value;
     }
-    public traverse<A, B, K, N>(
+    public traverse<A, B, N>(
         this: Maybe<A>,
-        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Maybe<B>, K, N>;
-    public traverse<A, B, K, N>(
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Maybe<B>, N>;
+    public traverse<A, B, N>(
         this: Maybe<nothing>,
-        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Maybe<nothing>, K, N>;
-    public traverse<A, B, K, N>(
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Maybe<nothing>, N>;
+    public traverse<A, B, N>(
         this: Maybe<A> | Maybe<nothing>,
-        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Maybe<B>, K, N> | Applicative<Maybe<nothing>, K, N> {
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
+        fn: (v: A) => Applicative<B, N>,
+    ): Applicative<Maybe<B>, N> | Applicative<Maybe<nothing>, N> {
         return this.isNothing() ? of(this) : fn(this.value).map(Maybe.of);
     }
-    public sequence<A, K, N>(
-        this: Maybe<Applicative<A, K, N>>,
-        of: (v: any) => any,
-    ) {
+    public sequence<A, N>(this: Maybe<Applicative<A, N>>, of: (v: any) => any) {
         return this.traverse(of, v => v);
     }
 }

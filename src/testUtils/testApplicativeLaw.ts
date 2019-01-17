@@ -1,11 +1,11 @@
 import { Applicative } from '../types';
 
-interface ApplicativeConstructor<Kind, Name> {
-    of<T>(v: T): Applicative<T, Kind, Name>;
+interface ApplicativeConstructor<Name> {
+    of<T>(v: T): Applicative<T, Name>;
 }
 
-export const testApplicativeLaw = <Kind, Name>(
-    Testee: ApplicativeConstructor<Kind, Name>,
+export const testApplicativeLaw = <Name>(
+    Testee: ApplicativeConstructor<Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Applicative Functor Law', () => {
