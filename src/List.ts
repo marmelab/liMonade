@@ -10,12 +10,16 @@ const swap = <A, N, T>(fn: (v: T) => Applicative<A, N>) => (
         })
         .ap(traversable);
 
-class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
+export class List<Value>
+    implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
     public static of<Value>(value: Value): List<Value> {
         return new List([value]);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => List<B> {
         return v => List.of(fn(v));
+    }
+    public static fromArray<Value>(value: Value[]): List<Value> {
+        return new List(value);
     }
     public readonly name: 'List';
     public readonly kind: 'List';
@@ -67,4 +71,10 @@ class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
     }
 }
 
-export default List;
+export type ListType<Value> = List<Value>;
+
+export default {
+    of: List.of,
+    fromArray: List.fromArray,
+    lift: List.lift,
+};

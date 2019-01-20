@@ -15,22 +15,22 @@ describe('Maybe', () => {
 
         it('chaining nothing to a just return nothing', () => {
             const just = Maybe.of(5);
-            expect(just.chain(() => new Maybe(null))).toEqual(new Maybe(null));
+            expect(just.chain(() => Maybe.of(null))).toEqual(Maybe.of(null));
         });
 
         it('applying nothing to a just return nothing', () => {
             const just = Maybe.of(double);
-            const nothing = new Maybe(null);
-            expect(just.ap(nothing)).toEqual(new Maybe(null));
+            const nothing = Maybe.of(null);
+            expect(just.ap(nothing)).toEqual(Maybe.of(null));
         });
 
         it('chaining just to nothing return nothing', () => {
-            const nothing = new Maybe(null);
+            const nothing = Maybe.of(null);
             expect(nothing.chain(doubleMaybe)).toEqual(nothing);
         });
 
         it('applying a just to nothing return nothing', () => {
-            const nothing = new Maybe(null);
+            const nothing = Maybe.of(null);
             const just = Maybe.of(5);
             expect(nothing.ap(just)).toEqual(nothing);
         });

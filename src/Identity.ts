@@ -45,4 +45,9 @@ class Identity<Value>
     }
 }
 
-export default Identity;
+export type IdentityType<Value> = Identity<Value>;
+
+export default {
+    of: Identity.of,
+    lift: Identity.lift,
+};

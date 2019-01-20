@@ -46,4 +46,14 @@ class Reader<Value, Dependencies>
     }
 }
 
-export default Reader;
+export type ReaderType<Value, Dependencies> = Reader<Value, Dependencies>;
+
+const ReaderExport = <Value, Dependencies>(
+    computation: (v: Dependencies) => Value,
+) => new Reader(computation);
+
+ReaderExport.of = Reader.of;
+ReaderExport.ask = Reader.ask;
+ReaderExport.lift = Reader.lift;
+
+export default ReaderExport;

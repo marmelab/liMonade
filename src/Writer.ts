@@ -1,6 +1,6 @@
 import { Applicative, Monad } from './types';
 
-export default class Writer<Value>
+class Writer<Value>
     implements Applicative<Value, 'Writer'>, Monad<Value, 'Writer'> {
     public static of<Value>(value: Value): Writer<Value> {
         return new Writer(value, []);
@@ -40,3 +40,13 @@ export default class Writer<Value>
         return new Writer(inner.value, this.log.concat(inner.log));
     }
 }
+
+export type WriterType<Value> = Writer<Value>;
+
+const WriterExport = <Value>(value: Value, log: any[] = []) =>
+    new Writer(value, log);
+
+WriterExport.of = Writer.of;
+WriterExport.lift = Writer.lift;
+
+export default WriterExport;

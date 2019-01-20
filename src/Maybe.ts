@@ -2,7 +2,7 @@ import { Applicative, Monad, Traversable } from './types';
 
 export type nothing = undefined | null;
 
-class Maybe<Value>
+export class Maybe<Value>
     implements Traversable<Value, 'Maybe'>, Monad<Value, 'Maybe'> {
     public static of<Value>(value: Value): Maybe<Value> {
         return new Maybe(value);
@@ -89,4 +89,9 @@ class Maybe<Value>
     }
 }
 
-export default Maybe;
+export type MaybeType<Value> = Maybe<Value>;
+
+export default {
+    of: Maybe.of,
+    list: Maybe.lift,
+};

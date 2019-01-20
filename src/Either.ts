@@ -14,6 +14,17 @@ class Either<Value, Type extends 'Left' | 'Right'>
             ? Either.Left(value)
             : Either.Right(value);
     }
+    public static lift<A, B>(
+        fn: (v: A) => B,
+    ): (v: A) => Right<B> | Left<Error> {
+        return v => {
+            try {
+                return Either.of(fn(v));
+            } catch (error) {
+                return Either.Left(error);
+            }
+        };
+    }
     public static Right<Value>(value: Value): Right<Value> {
         return new Either(value);
     }
@@ -115,4 +126,14 @@ class Either<Value, Type extends 'Left' | 'Right'>
     }
 }
 
-export default Either;
+export type EitherType<Value, Type extends 'Left' | 'Right'> = Either<
+    Value,
+    Type
+>;
+
+export default {
+    of: Either.of,
+    lift: Either.lift,
+    Left: Either.Left,
+    Right: Either.Right,
+};

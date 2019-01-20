@@ -1,4 +1,4 @@
-import List from './List';
+import List, { ListType } from './List';
 import State from './State';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
@@ -54,15 +54,15 @@ describe('IO', () => {
     });
 
     it('list should allow to convert a list of State into a single State of a list', () => {
-        const list = new List([1, 2, 3]);
+        const list = List.fromArray([1, 2, 3]);
 
         const state = list.traverse(State.of, v => State.of(v * 2)) as State<
-            List<number>,
+            ListType<number>,
             number
         >;
 
         expect(state.runState(10)).toEqual({
-            value: new List([2, 4, 6]),
+            value: List.fromArray([2, 4, 6]),
             state: 10,
         });
     });

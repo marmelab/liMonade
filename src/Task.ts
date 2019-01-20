@@ -4,6 +4,9 @@ class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
     public static of<Value>(value: Value): Task<Value> {
         return new Task((resolve, _) => resolve(value));
     }
+    public static reject(error: Error): Task<Error> {
+        return new Task((_, reject) => reject(error));
+    }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Task<B> {
         return v => Task.of(fn(v));
     }
@@ -59,4 +62,15 @@ class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
     }
 }
 
-export default Task;
+export type TaskType<Value> = Task<Value>;
+
+const TaskExport = (
+    cps: (resolve: (v: {}) => void, reject: (v: Error) => void) => void,
+) => new Task(cps);
+
+TaskExport.of = Task.of;
+TaskExport.resolve = Task.of;
+TaskExport.reject = Task.reject;
+TaskExport.lift = Task.lift;
+
+export default TaskExport;

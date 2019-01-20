@@ -1,7 +1,7 @@
 import createCompose from '../Compose';
 import Either, { Left, Right } from '../Either';
-import Identity from '../Identity';
-import Maybe from '../Maybe';
+import Identity, { IdentityType } from '../Identity';
+import Maybe, { MaybeType } from '../Maybe';
 import { Applicative, Traversable } from '../types';
 
 interface TraversableConstructor<Name> {
@@ -36,7 +36,7 @@ export const testTraversableLaw = <Name>(
                     new Compose(
                         Identity.of(Either.of(Testee.of(true)))
                             .sequence(Either.of)
-                            .map((v: Identity<Right<{}>>) =>
+                            .map((v: IdentityType<Right<{}>>) =>
                                 v.sequence(Testee.of),
                             ),
                     ),
@@ -47,19 +47,19 @@ export const testTraversableLaw = <Name>(
         it('Naturality', async () => {
             function maybeToEither<T>(
                 maybe: Applicative<null, 'Maybe'>,
-            ): Left<'no value'>;
-            function maybeToEither<T>(maybe: Applicative<T, 'Maybe'>): Right<T>;
+            ): Left<Error>;
+            function maybeToEither<T>(maybe: MaybeType<T>): Right<T>;
             function maybeToEither<T>(
-                maybe: Maybe<T> | Maybe<null>,
-            ): Right<T> | Left<string> {
+                maybe: MaybeType<T> | MaybeType<null>,
+            ): Right<T> | Left<Error> {
                 return maybe.isNothing()
-                    ? Either.ofError('no value')
+                    ? Either.Left(new Error('no value'))
                     : Either.of(maybe.flatten());
             }
 
-            const a = Testee.of(Maybe.of('value')).sequence(Maybe.of) as Maybe<
-                Traversable<string, Name>
-            >;
+            const a = Testee.of(Maybe.of('value')).sequence(
+                Maybe.of,
+            ) as MaybeType<Traversable<string, Name>>;
             expect(await getValue(maybeToEither(a))).toEqual(
                 await getValue(
                     Testee.of(Maybe.of('value'))

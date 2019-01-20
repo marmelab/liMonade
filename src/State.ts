@@ -66,4 +66,17 @@ class State<Value, Status>
     }
 }
 
-export default State;
+export type StateType<Value, Status> = State<Value, Status>;
+
+const StateExport = <Value, Status>(
+    runState: (v: Status) => { value: Value; state: Status },
+) => new State(runState);
+
+StateExport.of = State.of;
+StateExport.lift = State.lift;
+StateExport.getState = State.getState;
+StateExport.save = State.save;
+StateExport.update = State.update;
+StateExport.getStateAndUpdate = State.getStateAndUpdate;
+
+export default StateExport;
