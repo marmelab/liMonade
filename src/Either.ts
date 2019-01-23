@@ -53,6 +53,12 @@ class Either<Value, Type extends 'Left' | 'Right'>
     ): Right<A> | Right<B> {
         return this.isLeft() ? Either.of(fn(this.value)) : this;
     }
+    public get() {
+        if (this.isLeft()) {
+            throw this.value;
+        }
+        return this.value;
+    }
     public map<A, B>(this: Right<A>, fn: (v: A) => B): Right<B>;
     public map<A, B>(this: Left<Error>, fn: (v: A) => B): Left<Error>;
     public map<A, B>(

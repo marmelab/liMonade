@@ -7,14 +7,20 @@ class Reader<Value, Dependencies> implements Category<Value, 'Reader'> {
     public static ask<A>(): Reader<A, A> {
         return new Reader(v => v);
     }
-    public static lift<A, B>(fn: (v: A) => B): (v: A) => Reader<B, any> {
-        return v => Reader.of(fn(v));
+    public static lift<A, B, Dependencies>(
+        fn: (v: A) => (d: Dependencies) => B,
+    ): (v: A) => Reader<B, any> {
+        return v =>
+            new Reader((dependencies: Dependencies) => fn(v)(dependencies));
     }
     public readonly name = 'Reader';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly computation: (v: Dependencies) => Value;
     constructor(computation: (v: Dependencies) => Value) {
         this.computation = computation;
+    }
+    public execute(deps: Dependencies) {
+        return this.computation(deps);
     }
     public map<A, B>(
         this: Reader<A, Dependencies>,

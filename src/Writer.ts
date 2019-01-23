@@ -4,8 +4,11 @@ class Writer<Value> implements Category<Value, 'Writer'> {
     public static of<Value>(value: Value): Writer<Value> {
         return new Writer(value, []);
     }
-    public static lift<A, B>(fn: (v: A) => B): (v: A) => Writer<B> {
-        return v => Writer.of(fn(v));
+    public static lift<A, B>(
+        fn: (v: A) => B,
+        logs: any[] = [],
+    ): (v: A) => Writer<B> {
+        return v => new Writer(fn(v), logs);
     }
     public readonly name = 'Writer';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
