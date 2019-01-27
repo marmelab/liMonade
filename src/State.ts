@@ -23,7 +23,6 @@ class State<Value, Status>
         return State.getState().chain((state: A) => State.of(f(state)));
     }
     public readonly name: 'State';
-    public readonly kind: 'State';
     public readonly runState: (v: Status) => { value: Value; state: Status };
     constructor(runState: (v: Status) => { value: Value; state: Status }) {
         this.runState = runState;

@@ -12,7 +12,6 @@ const createCompose = <N1, N2>(F: Pointed<N1>, G: Pointed<N2>) => {
         public static of<Value>(value: Value): Compose<Value> {
             return new Compose(F.of(G.of(value)));
         }
-        public readonly kind = 'Compose';
         public readonly name = 'Compose';
         private readonly value: Applicative<Applicative<Value, N2>, N1>;
         constructor(value: Applicative<Applicative<Value, N2>, N1>) {

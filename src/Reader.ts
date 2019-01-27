@@ -12,7 +12,6 @@ class Reader<Value, Dependencies>
         return v => Reader.of(fn(v));
     }
     public readonly name: 'Reader';
-    public readonly kind: 'Reader';
     public readonly computation: (v: Dependencies) => Value;
     constructor(computation: (v: Dependencies) => Value) {
         this.computation = computation;

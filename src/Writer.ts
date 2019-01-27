@@ -9,7 +9,6 @@ class Writer<Value>
         return v => Writer.of(fn(v));
     }
     public readonly name: 'Writer';
-    public readonly kind: 'Writer';
     private readonly value: Value;
     private readonly log: any[];
     constructor(value: Value, log: any[] = []) {

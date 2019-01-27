@@ -9,7 +9,6 @@ class Identity<Value>
         return v => new Identity(fn(v));
     }
     public readonly name: 'Identity';
-    public readonly kind: 'Identity';
     private readonly value: Value;
     constructor(value: Value) {
         this.value = value;

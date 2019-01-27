@@ -22,7 +22,6 @@ export class List<Value>
         return new List(value);
     }
     public readonly name: 'List';
-    public readonly kind: 'List';
     private readonly values: ReadonlyArray<Value>;
     constructor(values: ReadonlyArray<Value>) {
         this.values = values;

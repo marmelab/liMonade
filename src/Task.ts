@@ -11,7 +11,6 @@ class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
         return v => Task.of(fn(v));
     }
     public readonly name: 'Task';
-    public readonly kind: 'Task';
     public readonly cps: (
         resolve: (v: Value) => void,
         reject?: (v: Error) => void,

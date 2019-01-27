@@ -11,7 +11,6 @@ class IO<Value> implements Applicative<Value, 'IO'>, Monad<Value, 'IO'> {
         return v => IO.of(fn(v));
     }
     public readonly name: 'IO';
-    public readonly kind: 'IO';
     public readonly sideEffect: () => Value;
     constructor(sideEffect: () => Value) {
         this.sideEffect = sideEffect;
