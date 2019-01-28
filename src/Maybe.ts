@@ -69,23 +69,34 @@ export class Maybe<Value>
     }
     public traverse<A, B, N>(
         this: Maybe<A>,
-        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
     ): Applicative<Maybe<B>, N>;
     public traverse<A, B, N>(
         this: Maybe<nothing>,
-        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
     ): Applicative<Maybe<nothing>, N>;
     public traverse<A, B, N>(
         this: Maybe<A> | Maybe<nothing>,
-        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Maybe<nothing>) => Applicative<Maybe<nothing>, N>,
     ): Applicative<Maybe<B>, N> | Applicative<Maybe<nothing>, N> {
         return this.isNothing() ? of(this) : fn(this.value).map(Maybe.of);
     }
-    public sequence<A, N>(this: Maybe<Applicative<A, N>>, of: (v: any) => any) {
-        return this.traverse(of, v => v);
+    public sequence<A, N>(
+        this: Maybe<Applicative<A, N>>,
+        of: (v: any) => any,
+    ): Applicative<Maybe<A>, N>;
+    public sequence<A, N>(
+        this: Maybe<nothing>,
+        of: (v: any) => Applicative<any, N>,
+    ): Applicative<Maybe<nothing>, N>;
+    public sequence<A, N>(
+        this: Maybe<Applicative<A, N>> | Maybe<nothing>,
+        of: (v: any) => Applicative<Maybe<any>, N>,
+    ): Applicative<Maybe<A>, N> | Applicative<Maybe<nothing>, N> {
+        return this.traverse((v: any) => v, of);
     }
 }
 

@@ -59,14 +59,17 @@ export class List<Value>
 
     public traverse<A, B, N>(
         this: List<A>,
-        of: (v: List<A>) => Applicative<List<A>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: List<A>) => Applicative<List<A>, N>,
     ): Applicative<List<B>, N> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
 
-    public sequence<A, N>(this: List<Applicative<A, N>>, of: any) {
-        return this.traverse(of, (v: Applicative<A, N>) => v);
+    public sequence<A, N>(
+        this: List<Applicative<A, N>>,
+        of: any,
+    ): Applicative<List<A>, N> {
+        return this.traverse((v: any) => v, of);
     }
 }
 

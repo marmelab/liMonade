@@ -31,16 +31,16 @@ class Identity<Value>
     }
     public traverse<A, B, N>(
         this: Identity<A>,
-        _: (v: any) => any,
         fn: (v: A) => Applicative<B, N>,
+        _: (v: any) => any,
     ): Applicative<Identity<B>, N> {
         return fn(this.value).map(Identity.of);
     }
     public sequence<A, N>(
         this: Identity<Applicative<A, N>>,
         of: (v: any) => any,
-    ) {
-        return this.traverse(of, v => v);
+    ): Applicative<Identity<A>, N> {
+        return this.traverse(v => v, of);
     }
 }
 

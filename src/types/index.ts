@@ -30,8 +30,8 @@ export interface Traversable<Value, Name> extends Applicative<Value, Name> {
     ): Traversable<B, Name>;
     traverse<A, B, N>(
         this: Traversable<A, Name>,
-        of: (v: Traversable<A, Name>) => Applicative<Traversable<A, Name>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Traversable<A, Name>) => Applicative<Traversable<A, Name>, N>,
     ): Applicative<Traversable<A, Name>, N>;
     sequence<A, N>(
         this: Traversable<Applicative<A, N>, Name>,

@@ -95,18 +95,18 @@ class Either<Value, Type extends 'Left' | 'Right'>
     }
     public traverse<A, B, N>(
         this: Right<A>,
-        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
     ): Applicative<Right<A>, N>;
     public traverse<A, B, N>(
         this: Left<A>,
-        of: (v: Left<A>) => Applicative<Left<Error>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Left<A>) => Applicative<Left<Error>, N>,
     ): Applicative<Left<A>, N>;
     public traverse<A, B, N>(
         this: Right<A> | Left<Error>,
-        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
         fn: (v: A) => Applicative<B, N>,
+        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
     ): Applicative<Right<A>, N> {
         return this.isLeft() ? of(this) : fn(this.value).map(Either.of);
     }
