@@ -1,7 +1,6 @@
-import { Applicative, Monad, Traversable } from './types';
+import { Category, InferCategory } from './types';
 
-class Identity<Value>
-    implements Traversable<Value, 'Identity'>, Monad<Value, 'Identity'> {
+class Identity<Value> implements Category<Value, 'Identity'> {
     public static of<Value>(value: Value): Identity<Value> {
         return new Identity(value);
     }
@@ -14,7 +13,7 @@ class Identity<Value>
         this.value = value;
         this.name = 'Identity';
     }
-    public map<A, B>(this: Identity<A>, fn: (v: A) => B) {
+    public map<A, B>(this: Identity<A>, fn: (v: A) => B): Identity<B> {
         return new Identity(fn(this.value));
     }
     public flatten<A>(this: Identity<Identity<A>>): Identity<A> {
@@ -31,16 +30,16 @@ class Identity<Value>
     }
     public traverse<A, B, N>(
         this: Identity<A>,
-        fn: (v: A) => Applicative<B, N>,
+        fn: (v: A) => Category<B, N>,
         _: (v: any) => any,
-    ): Applicative<Identity<B>, N> {
-        return fn(this.value).map(Identity.of);
+    ): InferCategory<Identity<B>, N> {
+        return (fn(this.value) as InferCategory<B, N>).map(Identity.of);
     }
     public sequence<A, N>(
-        this: Identity<Applicative<A, N>>,
+        this: Identity<Category<A, N>>,
         of: (v: any) => any,
-    ): Applicative<Identity<A>, N> {
-        return this.traverse(v => v, of);
+    ): InferCategory<Identity<A>, N> {
+        return this.traverse((v: Category<A, N>) => v, of);
     }
 }
 

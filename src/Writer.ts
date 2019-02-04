@@ -1,7 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class Writer<Value>
-    implements Applicative<Value, 'Writer'>, Monad<Value, 'Writer'> {
+class Writer<Value> implements Category<Value, 'Writer'> {
     public static of<Value>(value: Value): Writer<Value> {
         return new Writer(value, []);
     }

@@ -1,5 +1,5 @@
-import List, { ListType } from './List';
-import Task, { TaskType } from './Task';
+import List from './List';
+import Task from './Task';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
@@ -95,7 +95,7 @@ describe('Task', () => {
         const fn3 = jest.fn(resolve => setTimeout(() => resolve(3), 3));
         const list = List.fromArray([Task(fn1), Task(fn2), Task(fn3)]);
 
-        const io = list.sequence(Task.of) as TaskType<ListType<number>>;
+        const io = list.sequence(Task.of);
 
         expect(fn1).toBeCalledTimes(0);
         expect(fn2).toBeCalledTimes(0);

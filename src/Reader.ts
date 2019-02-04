@@ -1,7 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class Reader<Value, Dependencies>
-    implements Applicative<Value, 'Reader'>, Monad<Value, 'Reader'> {
+class Reader<Value, Dependencies> implements Category<Value, 'Reader'> {
     public static of<Value>(value: Value): Reader<Value, any> {
         return new Reader(() => value);
     }

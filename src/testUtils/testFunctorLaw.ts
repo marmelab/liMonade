@@ -1,15 +1,11 @@
-import { Functor } from '../types';
+import { InferCategory } from '../types';
 
 const identity = <T>(v: T) => v;
 const increment = (v: number) => v + 1;
 const double = (v: number) => v * 2;
 
-interface FunctorConstructor<Name> {
-    of<T>(v: T): Functor<T, Name>;
-}
-
 export const testFunctorLaw = <Name>(
-    Testee: FunctorConstructor<Name>,
+    Testee: InferCategory<any, Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Functor Laws', () => {

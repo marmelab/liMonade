@@ -1,5 +1,5 @@
 import IO, { IOType } from './IO';
-import List, { ListType } from './List';
+import List from './List';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
@@ -59,7 +59,7 @@ describe('IO', () => {
             IO.fromSideEffect(fn3),
         ]);
 
-        const io = list.sequence(IO.of) as IOType<ListType<number>>;
+        const io = list.sequence(IO.of);
 
         expect(fn1).toBeCalledTimes(0);
         expect(fn2).toBeCalledTimes(0);

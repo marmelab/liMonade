@@ -1,40 +1,36 @@
-export interface Functor<Value, Name> {
+import { ComposeType } from '../Compose';
+import { EitherType } from '../Either';
+import { IdentityType } from '../Identity';
+import { IOType } from '../IO';
+import { ListType } from '../List';
+import { MaybeType } from '../Maybe';
+import { ReaderType } from '../Reader';
+import { StateType } from '../State';
+import { TaskType } from '../Task';
+import { WriterType } from '../Writer';
+
+export type InferCategory<Value, Name> = Name extends 'Either'
+    ? EitherType<Value, 'Right' | 'Left'>
+    : Name extends 'Identity'
+    ? IdentityType<Value>
+    : Name extends 'IO'
+    ? IOType<Value>
+    : Name extends 'List'
+    ? ListType<Value>
+    : Name extends 'Maybe'
+    ? MaybeType<Value>
+    : Name extends 'Reader'
+    ? ReaderType<Value, any>
+    : Name extends 'State'
+    ? StateType<Value, any>
+    : Name extends 'Task'
+    ? TaskType<Value>
+    : Name extends 'Writer'
+    ? WriterType<Value>
+    : Name extends 'Compose'
+    ? ComposeType<Value>
+    : any;
+
+export interface Category<Value, Name> {
     readonly name: Name;
-    map<A, B>(this: Functor<A, Name>, fn: (value: A) => B): Functor<B, Name>;
-}
-
-export interface Monad<Value, Name> extends Functor<Value, Name> {
-    map<A, B>(this: Monad<A, Name>, fn: (value: A) => B): Monad<B, Name>;
-    chain<A>(fn: ((v: Value) => Monad<A, Name>)): Monad<A, Name>;
-}
-
-export interface Applicative<Value, Name> extends Functor<Value, Name> {
-    map<A, B>(
-        this: Applicative<A, Name>,
-        fn: (value: A) => B,
-    ): Applicative<B, Name>;
-    ap<A, B>(
-        this: Applicative<(v: A) => B, Name>,
-        v: Applicative<A, Name>,
-    ): Applicative<B, Name>;
-}
-
-export interface Traversable<Value, Name> extends Applicative<Value, Name> {
-    map<A, B>(
-        this: Traversable<A, Name>,
-        fn: (value: A) => B,
-    ): Traversable<B, Name>;
-    ap<A, B>(
-        this: Traversable<(v: A) => B, Name>,
-        v: Traversable<A, Name>,
-    ): Traversable<B, Name>;
-    traverse<A, B, N>(
-        this: Traversable<A, Name>,
-        fn: (v: A) => Applicative<B, N>,
-        of: (v: Traversable<A, Name>) => Applicative<Traversable<A, Name>, N>,
-    ): Applicative<Traversable<A, Name>, N>;
-    sequence<A, N>(
-        this: Traversable<Applicative<A, N>, Name>,
-        of: (v: Traversable<A, Name>) => Applicative<Traversable<A, Name>, N>,
-    ): Applicative<Traversable<A, Name>, N>;
 }

@@ -1,6 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class IO<Value> implements Applicative<Value, 'IO'>, Monad<Value, 'IO'> {
+class IO<Value> implements Category<Value, 'IO'> {
     public static of<Value>(value: Value): IO<Value> {
         return new IO(() => value);
     }

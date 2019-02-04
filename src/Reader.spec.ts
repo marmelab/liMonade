@@ -1,4 +1,4 @@
-import List, { ListType } from './List';
+import List from './List';
 import Reader, { ReaderType } from './Reader';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
@@ -36,10 +36,7 @@ describe('IO', () => {
         const fn3 = jest.fn((operation: (v: number) => number) => operation(3));
         const list = List.fromArray([Reader(fn1), Reader(fn2), Reader(fn3)]);
 
-        const reader = list.sequence(Reader.of) as ReaderType<
-            ListType<number>,
-            (v: number) => number
-        >;
+        const reader = list.sequence(Reader.of);
 
         expect(fn1).toBeCalledTimes(0);
         expect(fn2).toBeCalledTimes(0);

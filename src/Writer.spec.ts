@@ -1,8 +1,8 @@
-import List, { ListType } from './List';
+import List from './List';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
-import Writer, { WriterType } from './Writer';
+import Writer from './Writer';
 
 describe('Writer', () => {
     testFunctorLaw(Writer);
@@ -28,7 +28,7 @@ describe('Writer', () => {
             Writer(3, ['log 4']),
         ]);
 
-        const writer = list.sequence(Writer.of) as WriterType<ListType<number>>;
+        const writer = list.sequence(Writer.of);
 
         expect(writer.readLog()).toEqual(['log 4', 'log 2', 'log 3', 'log 1']);
 

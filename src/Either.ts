@@ -1,10 +1,10 @@
-import { Applicative, Monad, Traversable } from './types';
+import { Category, InferCategory } from './types';
 
 export type Left<Value> = Either<Value, 'Left'>;
 export type Right<Value> = Either<Value, 'Right'>;
 
 class Either<Value, Type extends 'Left' | 'Right'>
-    implements Traversable<Value, 'Either'>, Monad<Value, 'Either'> {
+    implements Category<Value, 'Either'> {
     public static of<Value>(value: Value): Right<Value>;
     public static of<Value>(value: Value & Error): Left<Error>;
     public static of<Value>(
@@ -95,34 +95,38 @@ class Either<Value, Type extends 'Left' | 'Right'>
     }
     public traverse<A, B, N>(
         this: Right<A>,
-        fn: (v: A) => Applicative<B, N>,
-        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
-    ): Applicative<Right<A>, N>;
+        fn: (v: A) => Category<B, N>,
+        of: (v: Left<Error>) => Category<Left<Error>, N>,
+    ): InferCategory<Right<A>, N>;
     public traverse<A, B, N>(
         this: Left<A>,
-        fn: (v: A) => Applicative<B, N>,
-        of: (v: Left<A>) => Applicative<Left<Error>, N>,
-    ): Applicative<Left<A>, N>;
+        fn: (v: A) => Category<B, N>,
+        of: (v: Left<A>) => Category<Left<Error>, N>,
+    ): InferCategory<Left<A>, N>;
     public traverse<A, B, N>(
         this: Right<A> | Left<Error>,
-        fn: (v: A) => Applicative<B, N>,
-        of: (v: Left<Error>) => Applicative<Left<Error>, N>,
-    ): Applicative<Right<A>, N> {
-        return this.isLeft() ? of(this) : fn(this.value).map(Either.of);
+        fn: (v: A) => Category<B, N>,
+        of: (v: Left<Error>) => Category<Left<Error>, N>,
+    ): InferCategory<Right<A>, N> {
+        return this.isLeft()
+            ? of(this)
+            : (fn(this.value) as InferCategory<A, N>).map(Either.of);
     }
     public sequence<A, N>(
-        this: Right<Applicative<A, N>>,
+        this: Right<Category<A, N>>,
         of: (v: any) => any,
-    ): Applicative<Right<A>, N>;
+    ): InferCategory<Right<A>, N>;
     public sequence<A, N>(
         this: Left<Error>,
         of: (v: any) => any,
-    ): Applicative<Left<Error>, N>;
+    ): InferCategory<Left<Error>, N>;
     public sequence<A, N>(
-        this: Right<Applicative<A, N>> | Left<Error>,
+        this: Right<Category<A, N>> | Left<Error>,
         of: (v: any) => any,
-    ): Applicative<Right<A>, N> | Applicative<Left<Error>, N> {
-        return this.isLeft() ? of(this) : this.value.map(Either.of);
+    ): InferCategory<Right<A>, N> | Category<Left<Error>, N> {
+        return this.isLeft()
+            ? of(this)
+            : (this.value as InferCategory<A, N>).map(Either.of);
     }
 }
 

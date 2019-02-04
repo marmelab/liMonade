@@ -2,20 +2,23 @@ import createCompose from '../Compose';
 import Either, { Left, Right } from '../Either';
 import Identity, { IdentityType } from '../Identity';
 import Maybe, { MaybeType } from '../Maybe';
-import { Applicative, Traversable } from '../types';
+import { InferCategory } from '../types';
 
-interface TraversableConstructor<Name> {
-    of<T>(v: T): Traversable<T, Name>;
+interface Pointed<Name> {
+    of<A>(v: A): InferCategory<A, Name>;
 }
 
-export const testTraversableLaw = <Name>(
-    Testee: TraversableConstructor<Name>,
+export const testTraversableLaw = <
+    Name extends 'Identity' | 'Maybe' | 'Either' | 'List'
+>(
+    Testee: Pointed<Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Traversable Law', () => {
         it('Identity', async () => {
             expect(
                 await getValue(
+                    // @ts-ignore
                     Testee.of('value')
                         .map(Identity.of)
                         .sequence(Identity.of),
@@ -34,6 +37,7 @@ export const testTraversableLaw = <Name>(
             ).toEqual(
                 await getValue(
                     new Compose(
+                        // @ts-ignore
                         Identity.of(Either.of(Testee.of(true)))
                             .sequence(Either.of)
                             .map((v: IdentityType<Right<{}>>) =>
@@ -46,7 +50,7 @@ export const testTraversableLaw = <Name>(
 
         it('Naturality', async () => {
             function maybeToEither<T>(
-                maybe: Applicative<null, 'Maybe'>,
+                maybe: InferCategory<null, 'Maybe'>,
             ): Left<Error>;
             function maybeToEither<T>(maybe: MaybeType<T>): Right<T>;
             function maybeToEither<T>(
@@ -56,12 +60,13 @@ export const testTraversableLaw = <Name>(
                     ? Either.Left(new Error('no value'))
                     : Either.of(maybe.flatten());
             }
-
+            // @ts-ignore
             const a = Testee.of(Maybe.of('value')).sequence(
                 Maybe.of,
-            ) as MaybeType<Traversable<string, Name>>;
+            ) as MaybeType<InferCategory<string, Name>>;
             expect(await getValue(maybeToEither(a))).toEqual(
                 await getValue(
+                    // @ts-ignore
                     Testee.of(Maybe.of('value'))
                         .map(maybeToEither)
                         .sequence(Either.of),

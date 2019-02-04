@@ -1,7 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class State<Value, Status>
-    implements Applicative<Value, 'State'>, Monad<Value, 'State'> {
+class State<Value, Status> implements Category<Value, 'State'> {
     public static of<Value, Status>(value: Value): State<Value, Status> {
         return new State((state: Status) => ({ value, state }));
     }

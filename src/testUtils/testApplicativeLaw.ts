@@ -1,11 +1,11 @@
-import { Applicative } from '../types';
+import { InferCategory } from '../types';
 
-interface ApplicativeConstructor<Name> {
-    of<T>(v: T): Applicative<T, Name>;
+interface Pointed<Name> {
+    of<A>(v: A): InferCategory<A, Name>;
 }
 
 export const testApplicativeLaw = <Name>(
-    Testee: ApplicativeConstructor<Name>,
+    Testee: Pointed<Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Applicative Functor Law', () => {

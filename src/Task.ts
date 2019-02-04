@@ -1,6 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class Task<Value> implements Applicative<Value, 'Task'>, Monad<Value, 'Task'> {
+class Task<Value> implements Category<Value, 'Task'> {
     public static of<Value>(value: Value): Task<Value> {
         return new Task((resolve, _) => resolve(value));
     }
