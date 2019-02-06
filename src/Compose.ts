@@ -7,39 +7,40 @@ export interface Pointed<Name> {
 // The functor that compose functors.
 // It allows to operate on a value nested in two functors `Functor(Functor(value))`.
 // Needed to test Traversable law. You will probably never use it.
-const createCompose = <N1, N2>(F: Pointed<N1>, G: Pointed<N2>) => {
-    class Compose<Value> implements Category<Value, 'Compose'> {
-        public static of<Value>(value: Value): Compose<Value> {
-            return new Compose(F.of(G.of(value)));
-        }
-        public readonly name = 'Compose';
-        private readonly value: InferCategory<InferCategory<Value, N2>, N1>;
-        constructor(value: InferCategory<InferCategory<Value, N2>, N1>) {
-            this.value = value;
-        }
-        public map<A, B>(this: Compose<A>, fn: (v: A) => B): Compose<B> {
-            return new Compose(
-                this.value.map((x: InferCategory<A, N2>) => x.map(fn)),
-            );
-        }
-        public ap<A, B>(
-            this: Compose<(v: A) => B>,
-            other: Compose<A>,
-        ): Compose<B> {
-            return this.map(fn => other.map(fn).value) as Compose<B>;
-        }
+class Compose<Value, N1, N2> implements Category<Value, 'Compose'> {
+    public static of<Value, N1, N2>(
+        value: Value,
+        F: Pointed<N1>,
+        G: Pointed<N2>,
+    ): Compose<Value, N1, N2> {
+        return new Compose(F.of(G.of(value)));
     }
-    return Compose;
-};
-
-// @ts-ignore
-export interface ComposeType<Value> {
-    name: 'Compose';
-    map<A, B>(this: ComposeType<A>, fn: (v: A) => B): ComposeType<B>;
-    ap<A, B>(
-        this: ComposeType<(v: A) => B>,
-        other: ComposeType<A>,
-    ): ComposeType<B>;
+    public readonly name = 'Compose';
+    private readonly value: InferCategory<InferCategory<Value, N2>, N1>;
+    constructor(value: InferCategory<InferCategory<Value, N2>, N1>) {
+        this.value = value;
+    }
+    public map<A, B>(
+        this: Compose<A, N1, N2>,
+        fn: (v: A) => B,
+    ): Compose<B, N1, N2> {
+        return new Compose(
+            this.value.map((x: InferCategory<A, N2>) => x.map(fn)),
+        );
+    }
+    public ap<A, B>(
+        this: Compose<(v: A) => B, N1, N2>,
+        other: Compose<A, N1, N2>,
+    ): Compose<B, N1, N2> {
+        return this.map(fn => other.map(fn).value) as Compose<B, N1, N2>;
+    }
 }
 
-export default createCompose;
+export type IdentityType<Value, N1, N2> = Compose<Value, N1, N2>;
+
+export default {
+    of: Compose.of,
+    create: <Value, N1, N2>(
+        v: InferCategory<InferCategory<Value, N2>, N1>,
+    ): Compose<Value, N1, N2> => new Compose(v),
+};
