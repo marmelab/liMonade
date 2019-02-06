@@ -222,59 +222,112 @@ if(maybeABasket.isNothing()) {
 ## Maybe api
 
 - Maybe take a value and return a maybe, if the passed value is null or undefined, all operation on the maybe to change the value will be ignored.
+
 - Maybe.of: same as Maybe
-- Maybe.lift: Take a function and wrap its return value in Maybe
+
+- Maybe.lift: Takes a function and wrap its return value in Maybe
 ```ts
-lift<A, B>(fn: (v: A) => B): (v: A): Maybe<B>;
+// Maybe.lift(fn: A => B): (v: A) => Maybe<B>;
+const fn = Maybe.lift(v => v * 2);
+// is the same as
+const fn = v => Maybe.of(v * 2);
 ```
+
 - maybe.map: Take a function and apply it to the value if there is one
 ```ts
-map<A, B>(this: Maybe<A>, fn: (value: A) => B): Maybe<B>;
-map<A, B>(this: Maybe<nothing>, fn: (value: A) => B): Maybe<nothing>;
+// Maybe<A>.map<fn: A => B>: Maybe<B>;
+Maybe.of(5).map(v => v * 2);
+-> Maybe<10>;
+// Maybe<null | undefined>.map(fn: A => B): Maybe<null | undefined>;
+Maybe.of(null).map(v => v * 2);
+-> Maybe<null>;
 ```
 - maybe.flatten: If the value is another Maybe merge the two together. If there is no value, do nothing.
 ```ts
-flatten<A>(this: Maybe<Maybe<A>>): Maybe<A>;
-flatten<A>(this: Maybe<nothing>): Maybe<nothing>;
+// Maybe<Maybe<A>>.flatten(): Maybe<A>;
+Maybe.of(Maybe.of(5)).flatten();
+-> Maybe<5>;
+// Maybe<null | undefined>.flatten(): Maybe<null | undefined>;
+Maybe.of(null).flatten();
+-> Maybe<null>;
 ```
 - maybe.chain
 ```ts
-chain<A, B>(this: Maybe<A>, fn: ((v: A) => Maybe<B>)): Maybe<B>;
-chain<A, B>(this: Maybe<nothing>, fn: ((v: A) => Maybe<B>)): Maybe<nothing>;
+//Maybe<A>.chain(fn: A => Maybe<B>): Maybe<B>;
+Maybe.of(5).chain(v => Maybe.of(v * 2));
+-> Maybe<10>;
+// Maybe<nothing>.chain(fn: A => Maybe<B>): Maybe<nothing>;
+Maybe.of(null).chain(v => Maybe.of(v * 2));
+-> Maybe<null>;
 ```
 - maybe.ap
 ```ts
-ap<A, B>(this: Maybe<(v: A) => B>, v: Maybe<A>): Maybe<B>;
-ap<A, B>(this: Maybe<nothing>, v: Maybe<A>): Maybe<nothing>;
-ap<A, B>(this: Maybe<(v: A) => B>, v: Maybe<nothing>): Maybe<nothing>;
+// Maybe<A => B>.ap(other: Maybe<A>): Maybe<B>;
+Maybe.of(v => v * 2).ap(Maybe.of(5));
+-> Maybe<10>;
+// Maybe<nothing>.ap(other: Maybe<A>): Maybe<nothing>;
+Maybe.of(null).ap(Maybe.of(5));
+-> Maybe<null>;
+// Maybe<A => B>.ap(other: Maybe<nothing>): Maybe<nothing>;
+Maybe.of(v => v * 2).ap(Maybe.of(null));
+-> Maybe<null>;
 ```
 - maybe.sequence: when the maybe hold an applicative, it will swap the maybe with the applicative. If the maybe hold nothing it will place the maybe inside an apllicative.
 ```ts
-sequence<A>(this: Maybe<Applicative<A>>,
-        of: (v: Value) => Applicative<Value>,
-    ): Applicative<Maybe<A>>;
-sequence<A>(
-    this: Maybe<nothing>,
-    of: (v: Value) => Applicative<Value>,
-): Applicative<Maybe<nothing>>;
+/**
+ * Maybe<Applicative<A>>.sequence(
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Maybe<A>>;
+ * */
+Maybe.of(Identity.of(5)).sequence(Identity.of);
+    -> Identity<Maybe<5>>;
+/*
+ * Maybe<nothing>.sequence<A>(
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Maybe<nothing>>;
+ * */
+Maybe.of(null).sequence(Identity.of);
+    -> Identity<Maybe<null>>;
 ```
 - maybe.traverse: map a function returning an applicative and then swap the applicative with the maybe.
 If the maybe hold nothing, an Apllicative<Maybe<nothing>> will be returned
 ```ts
-traverse<A, B>(
-    this: Maybe<Applicative<A>>,
-    of: (v: Value) => Applicative<Value>,
-    fn: (v: A) => Applicative<B>,
-): Applicative<Maybe<B>>;
-sequence<A, B>(
-    this: Maybe<nothing>,
-    of: (v: Value) => Applicative<Value>,
-    fn: (v: A) => Applicative<B>,
-): Applicative<Maybe<nothing>>;
+/*
+ * Maybe<Applicative<A>>.traverse(
+ *     fn: A => Applicative<B>,
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Maybe<B>>;
+ * */
+Maybe.of(5).traverse(v => Identity.of(v * 2));
+    -> Identity<Maybe<10>>;
+/*
+ * Maybe<nothing>.traverse(
+ *     of: Value => Applicative<Value>,
+ *     fn: A => Applicative<B>,
+ * ): Applicative<Maybe<nothing>>;
+ * */
+Maybe.of(null).traverse(v => Identity.of(v * 2));
+    -> Identity<Maybe<10>>;
 ```
 - maybe.isNothing: return true if the maybe holds nothing (null or undefined)
+
+```ts
+Maybe<A>.isNothing(): false;
+Maybe<nothing>.isNothing(): true;
+```
+
 - maybe.isJust: return true if the maybe holds a value
+
+```ts
+Maybe<A>.isJust(): true;
+Maybe<nothing>.isJust(): false;
+```
 - maybe.getOrElse: return the Maybe value or the given value if the maybe hold nothing.
+
+```ts
+Maybe<A>.getOrElse(defaultValue: B): A;
+Maybe<nothing>.getOrElse(defaultValue: B): B;
+```
 
 # Either
 
@@ -338,70 +391,125 @@ parseUser('{ "name": "john" }').get(); // { name: 'john' }
 - Either.of: same as Either
 - Either.Right: same as Either but accept only non error value. Return a Right Either
 - Either.Left: same as Either but accept only error value. Return a Left Either
-- EIther.lift: Take a function and wrap its return value in a Right Either or its thrown error in a left Either
+- Either.lift: Take a function and wrap its return value in a Right Either or its thrown error in a left Either
 ```ts
-lift<A, B>(fn: (v: A) => B): (v: A): Either<B> | Either<Error>;
+// Either.lift(fn: A => B): (v: A) => Either<B>;
+Either.lift(v => v * 2);
+    -> v => Either.of(v * 2);
+// Either.lift(fn: A => throw Error): (v: A) => Either<Error>;
+Either.lift(v => throw new Error('Boom'));
+    -> v => Either.of(new Error('Boom'));
 ```
+
 - either.map: Take a function and apply it to the value if it's not an error. If the function throw an error a Left Either of the error is returned
 ```ts
-map<A, B>(this: Either<A>, fn: (value: A) => B): Either<B>;
-map<A, B>(this: Either<Error>, fn: (value: A) => B): Either<Error>;
+// Either<A>.map(fn: A => B): Either<B>;
+Either.of(5).map(v => v * 2);
+-> Either<10>;
+
+// Either<Error>.map(fn: A => B): Either<Error>;
+Either.of(new Error('Boom')).map(v => v * 2);
+-> Either<new Error('Boom')>;
 ```
+
 - either.flatten: If the value is another Either merge the two together. If the value is an Error do nothing.
 ```ts
-flatten<A>(this: Either<Either<A>>): Either<A>;
-flatten<A>(this: Either<Error>): Either<Error>;
+// Either<Either<A>>.flatten(): Either<A>;
+Either.of(Either.of(5)).flatten();
+    -> Either<5>
+// Either<Error>.flatten(): Either<Error>;
+Either.of(new Error('Boom')).flatten();
+    -> Either<new Error('Boom')>
 ```
 - either.chain
 ```ts
-chain<A, B>(this: Either<A>, fn: ((v: A) => Either<B>)): Either<B>;
-chain<A, B>(this: Either<Error>, fn: ((v: A) => Either<B>)): Either<Error>;
+// Either<A>.chain<A, B>(fn: A => Either<B>): Either<B>;
+Either.of(5).chain(v => Either(v * 2));
+    -> Either<10>
+// Either<Error>.chain(fn: A => Either<B>): Either<Error>;
+Either.of(5).chain(v => v.concat('uh'));
+    -> Either<Error('v.concat is not a function')>
 ```
 - either.ap
 ```ts
-ap<A, B>(this: Either<(v: A) => B>, v: Either<A>): Either<B>;
-ap<A, B>(this: Either<Error>, v: Either<A>): Either<Error>;
-ap<A, B>(this: Either<(v: A) => B>, v: Either<Error>): Either<Error>;
+// Either<A => B>.ap(other: Either<A>): Either<B>;
+Either.of(v => v * 2).ap(Either.of(5));
+    -> Either<10>
+// Either<Error>.ap(other: Either<A>): Either<Error>;
+Either.of(new Error('Boom')).ap(Either.of(5));
+    -> Either<new Error('Boom')>
+// Either<A => B>.ap(other: Either<Error>): Either<Error>;
+Either.of(v => v * 2).ap(Either.of(new Error('Boom')));
+    -> Either<new Error('Boom')>
 ```
 - either.sequence: when the either hold an applicative, it will swap the either with the applicative. If the either hold an error it will place the either inside an apllicative.
 ```ts
-sequence<A>(this: Either<Applicative<A>>,
-        of: (v: Value) => Applicative<Value>,
-    ): Applicative<Either<A>>;
-sequence<A>(
-    this: Either<Error>,
-    of: (v: Value) => Applicative<Value>,
-): Applicative<Either<Error>>;
+/*
+ * Either<Applicative<A>>.sequence(
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Either<A>>;
+ * */
+Either.of(Identity.of(5)).sequence(Identity.of);
+    -> Identity<Either<5>>
+/*
+ * Either<Error>.sequence(
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Either<Error>>;
+ * */
+Either.of(new Error('Boom')).sequence(Identity.of);
+    -> Identity<Either<new Error('Boom')>>
 ```
 - maybe.traverse: map a function returning an applicative and then swap the applicative with the either.
 If the either hold an error, an Apllicative<Maybe<Error>> will be returned
 ```ts
-traverse<A, B>(
-    this: Either<Applicative<A>>,
-    of: (v: Value) => Applicative<Value>,
-    fn: (v: A) => Applicative<B>,
-): Applicative<Either<B>>;
-sequence<A, B>(
-    this: Either<Error>,
-    of: (v: Value) => Applicative<Value>,
-    fn: (v: A) => Applicative<B>,
-): Applicative<Either<Error>>;
+/*
+ * Either<Applicative<A>>.traverse(
+ *     fn: A => Applicative<B>,
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Either<B>>;
+ * */
+Either.of(5).traverse(v => Identity.of(v * 2));
+    -> Identity<Either<10>>
+/*
+ * Either<Error>.sequence(
+ *     fn: A => Applicative<B>,
+ *     of: Value => Applicative<Value>,
+ * ): Applicative<Either<Error>>;
+ * */
+Either.of(5).traverse(v => throw new Error('Boom'));
+    -> Identity<Either<new Error('Boom')>>
 ```
 - maybe.catch: works like map, it accept a function, and will call it if the value is an error. It Will transform the Error in a value an return a Right Error.
 ```ts
-catch<A, B>(this: Either<A>, fn: (error: Error) => B): Either<A>;
-catch<A, B>(this: Either<Error>, fn: (error: Error) => B): Either<B>;
+// Either<A>.catch(fn: Error => B): Either<A>;
+Either.of(5).catch(error => error.message);
+    -> Either<5>
+// Either<Error>.catch(fn: Error => B): Either<B>;
+Either.of(new Error('Boom')).catch(error => error.message);
+    -> Either<'Boom'>
 ```
 - maybe.isLeft: return true if the maybe holds an error
+```ts
+Either<A>.isLeft(): false;
+Either<Error>.isLeft(): true;
+```
 - maybe.isRight: return true if the maybe holds a value
+```ts
+Either<A>.isRight(): true;
+Either<Error>.isRight(): false;
+```
 - maybe.get: return the value or throw the error
+```ts
+Either<A>.get(): A;
+Either<Error>.get(): throw Error;
+```
 
 ## IO
 
 IO is a shorthand for `Input/Output` IO is used to handle side effect. Instead of holding the value directly, we hold a function that will return the value. The important distinction compared to the previous monads is that IO is lazy. We can map all we want, nothing will happen until you call its execute method.
 It is useful to handle computation that depends on an external factor. Like user input.
 
-## Example
+### Example
 
 Let's say that we have an input field and an output where we want to display what the user typed, but in uppercase
 
@@ -428,6 +536,69 @@ const displayInput = outputIO.ap(
 ```
 // TODO add a codepen link once the library is published
 
+### IO api
+
+- IO takes a side effect function and return an IO that will allow to operate on the side effect return value
+
+```ts
+// IO(fn: () => Value): IO<Value>
+IO(() => 5);
+    -> IO<5>
+```
+
+- IO.fromSideEffect: Same as IO
+
+- IO.of: take a value and return an IO that will allow to operate on the value
+
+```ts
+// IO.of(v: Value): IO<Value>
+IO.of(5)
+    -> IO<5>
+```
+
+- IO.lift: Take a function and wrap its return value in a IO
+```ts
+// IO.lift(fn: A => B): (v: A) => IO<B>;
+IO.lift(v => v * 2);
+    -> v => IO.of(v * 2);
+```
+
+- io.map: Take a function and apply it to the side effect return value (this is lazy and won't execute the side effect)
+```ts
+// IO<A>.map(fn: A => B): IO<B>;
+const io = IO(() => 5).map(v => v * 2);
+    -> IO<10>
+```
+
+- io.flatten: If the value is another IO merge the two together. It's lazy.
+```ts
+// IO<IO<A>>.flatten(): IO<A>;
+IO.of(IO.of(5)).flatten();
+    -> IO<5>
+```
+
+- io.chain
+```ts
+// IO<A>.chain(fn: A => IO<B>): IO<B>;
+IO.of(5).chain(v => IO.of(v * 2));
+    -> IO<10>
+```
+
+- io.ap
+```ts
+// IO<A => B>.ap(other: IO<A>): IO<B>;
+IO.of(v => v * 2).ap(IO.of(5));
+    -> IO<10>
+```
+
+- io.execute: trigger the side effect and all the added computation and returns the result
+```ts
+// IO<A>.execute(): A;
+IO(() => 'result').execute();
+    -> 'result'
+IO.of('result').execute();
+    -> 'result'
+```
 
 ## Task
 
@@ -462,6 +633,101 @@ getJoke42Task.then(console.log, console.log); // let's trigger the task
 getJoke(9999).then(console.log, console.log); // "joke not found"
 ```
 
+### Task api
+
+- Task takes an asynchronous function and return a Task
+
+```ts
+/*
+ * Task(
+ *     cps: (resolve: Value => void, reject: Error => void) => void,
+ * ): Task<Value>
+ * */
+Task((resolve, reject) => resolve('success'));
+    -> Task<'success'>
+```
+
+- Task.of: take a value and return a Task that will allow to operate on the value
+
+```ts
+// Task.of<Value>(value: Value): Task<Value>
+Task.of(5);
+    -> Task<5>
+```
+
+- Task.reject: take a value and return a Task rejected with this value. A rejected Task like a left either will ignore all operation on it except catch.
+
+```ts
+Task.reject('error').map(v => v * 2);
+    -> RejectedTask<'error'>
+```
+
+- Task.lift: Takes a function and wrap its return value in a Task
+```ts
+// Task.lift(fn: A => B): A => Task<B>;
+Task.lift(v => v * 2);
+    -> v => Task.of(v * 2);
+```
+
+- task.map: Takes a function and apply it to the async return value (this is lazy)
+```ts
+// Task<A>.map(fn: A => B): Task<B>;
+Task.of(5).map(v => v * 2);
+    -> Task<10>
+Task.reject('error').map(v => v * 2);
+    -> Task<'error'>
+```
+
+- task.catch: Takes a function and apply it to the async error value if there is one. (this is lazy)
+```ts
+// Task<A>.catch(fn: Error => B): Task<A>;
+Task.of(5).catch(v => v * 2);
+    ->Task<5>
+// RejectedTask<A>.catch(fn: A => B): Task<B>;
+Task.reject(5).catch(v => v * 2);
+    ->Task<10>
+```
+
+- task.flatten: If the value is another Task merge the two together. It's lazy.
+```ts
+// Task<Task<A>>.flatten(): Task<A>;
+Task.of(Task.of(5)).flatten();
+    -> Task<5>
+// RejectedTask<A>.flatten(): RejectedTask<A>;
+
+Task.reject(5).flatten();
+    -> RejectedTask<5>
+```
+
+- task.chain
+```ts
+// Task<A>.chain(fn: A => Task<B>): Task<B>;
+Task.of(5).chain(v => Task.of(v * 2));
+    -> Task<10>
+// RejectedTask<A>.chain(fn: A => Task<B>): RejectedTask<A>;
+Task.reject(5).chain(v => Task.of(v * 2));
+    -> RejectedTask<5>
+```
+
+- task.then: Takes a resolve and a reject callback and call resolve with the async operation result, or reject with the error.
+```ts
+// Task<Value>.then(resolve: Value => void, reject?: Error => void): void
+Task.of(5).then(
+    value => // will be called with 5
+    error => // will not be called
+);
+
+Task.reject(5).then(
+    value =>  // will not be called
+    error => // will be called with 5
+);
+
+```
+
+- task.toPromise convert the task into a promise. This will trigger the asynchronous operation
+```ts
+// Task<Value>.toPromise(): Promise<Value>
+```
 
 ## List
 
@@ -502,6 +768,90 @@ List.fromArray([42, 47, 77])
 ```
 @TODO: Add codepen link to prove it works
 
+### List api
+
+- List takes an array of value and return a List
+
+```ts
+// List(values: Value[]): List<Value>
+List([1, 2, 3]);
+    -> List<[1, 2, 3]>
+```
+
+- List.of: take a single value and return a List that will allow to operate on this value
+
+```ts
+// List.of(value: Value): List<Value>
+List.of(5);
+    -> List<[5]>
+```
+
+- List.lift: Takes a function and wrap its return value in a List
+```ts
+// List.lift(fn: A => B): A => List<B>;
+List.lift(v => v * 2);
+    -> v => List.of(v * 2);
+```
+
+- list.map: Takes a function and apply it to all the value in the list
+```ts
+// List<A>.map(fn: A => B): List<B>;
+List([1, 2, 3]).map(v => v * 2);
+    -> List<[2, 4, 6]>
+```
+
+- list.flatten: If the values are other List merge the two together. concatening the values from each list.
+```ts
+// List<List<A>>.flatten(): List<A>;
+List([List([1, 2]), List([3, 4], List([5, 6]))]);
+    -> List([1, 2, 3, 4, 5, 6]);
+```
+
+- list.chain
+```ts
+// List<A>.chain<A, B>(fn: A => List<B>): List<B>;
+List(['hello', 'world']).chain(v => List(v.split('')));
+    -> List(['h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'])
+```
+
+- list.toArray: convert the list into an array
+```ts
+// List<A>.toArray(): A[];
+List([1, 2, 3]).toArray();
+    -> [1, 2, 3]
+```
+
+- list.concat: same as Array.concat
+```ts
+// List<A>.concat(otherList: List<A>): List<A>;
+List([1, 2, 3]).concat(4);
+    -> List([1, 2, 3, 4])
+```
+
+- list.sequence: convert a list of applicative into an applicative of a list.
+```ts
+/*
+ * List<Applicative<A>>.sequence(
+ *      of: Value => Applicative<Value>
+ * ): Applicative<List<B>>;
+ * */
+List([Identity.of(1), Identity.of(2), Identity.of(3)]).sequence(Identity.of);
+    -> Identity<List<1,2,3>>
+```
+
+- list.traverse: like list.sequence, but first take a function transforming the values into Applicative.
+```ts
+/*
+ * List<A>.traverse(
+ *     fn: A => Applicative<B>,
+ *     of: Value => Applicative<Value>
+ * ): Applicative<List<B>>;
+ * */
+List([1, 2, 3]).traverse(v => Identity.of(v => v * 2));
+    -> Identity<List<[2, 4, 6]>>
+```
+
+
 ## Reader
 
 The reader monad allow to share value between all composed function. Think of it like dependency injection.
@@ -529,10 +879,89 @@ I did not handle null case for simplicity sake. Here is the same example, but us
 
 // TODO add codepen link
 
+### Reader api
+
+- Reader takes a function `(v: Dependencies) => Value` and returns a `Reader<Value, Dependencies>`
+
+```ts
+/*
+ * Reader(
+ *     fn: Dependencies => Value,
+ * ): Reader<Value, Dependencies>
+ * */
+const reader = Reader(dependencies => dependencies * 2);
+reader.execute(5); // 10
+reader.execute(4); // 8
+```
+
+- Reader.of: take a single value and return a Reader that will allow to operate on this value
+
+```ts
+// Reader.of<Value>(value: Value): Reader<Value, any>;
+const reader = Reader.of(5);
+    -> Reader<5>
+reader.execute('ignored'); // 5
+```
+
+- Reader.ask: return a reader where the value is equal to the dependencies
+
+```ts
+// Reader.ask(): Reader<Dependencies, Dependencies>;
+Reader.ask().execute('gimme back'); // 'gimme back'
+```
+
+- Reader.lift: Takes a function returning a function and wrap its return value in a Reader
+```ts
+// Reader.lift(fn: A => Dependencies => B): A => Reader<B, Dependencies>;
+const multiplyReader = Reader.lift(v => multiplicator => v * multiplicator);
+    -> v => Reader(multiplicator => v * multiplicator);
+
+multiplyReader(5).execute(2); // 10
+```
+
+- list.execute: execute the operation with the given dependencies and return the result
+
+```ts
+// Reader<Value, Dependencies>.execute(deps: Dependencies): Value
+```
+
+- reader.map: Takes a function and apply it to the reader value. FUnction has no access to the dependencies.
+```ts
+// Reader<A, Dependencies>.map(fn: A => B): Reader<B, Dependencies>;
+const five = Reader.of(5).map(v => v * 2);
+    -> Reader<10>
+five.execute(5); // 10
+
+const reader = Reader.ask().map(v => v * 2);
+    -> Reader<?>
+reader.execute(5); // 10
+reader.execute(6); // 12
+```
+
+- reader.flatten: If the values are other Reader merge the two together.
+```ts
+// Reader<Reader<A>>.flatten(): Reader<A>;
+Reader.of(Reader.of(5)).flatten();
+    -> Reader<5>
+```
+
+- reader.chain
+```ts
+// Reader<A>.chain(fn: A => Reader<B>): Reader<B>;
+Reader.of(5).chain(v => Reader.of(v * 2));
+    -> Reader<10>
+
+const reader = Reader.of(5)
+    .chain(v => Reader(dependencies => dependencies(v)));
+reader.execute(v => v + 1); // 6
+reader.execute(v => v * 2); // 10
+
+```
+
 ## Writer
 
 The Writer Monad allows us to handle log while mapping function.
-That is you can map function, while adding string to an array of log.
+That is you can map function, while adding item to an array.
 
 ## Example:
 
@@ -573,4 +1002,107 @@ const verifyUser = user => Writer.of(user)
 
 verifyUser({}); // ['name is required', 'password is required']
 verifyUser({ name: 'fred', password: 'xxx' }); // ['name must be at least 5 character long', 'password must be at least 5 character long']
+```
+
+### Writer api
+
+- Writer takes a Value and an optional array of log (the log can be of any type default to empty array)
+
+```ts
+// Writer(value: Value, logs?: []): Writer<Value>
+Writer(5);
+    -> Writer<5, []>
+Writer(5, ['a five']);
+    -> Writer<5, ['a five']>
+```
+
+- Writer.of: take a single value and return a Writer with empty logs
+
+```ts
+// Writer.of(value: Value): Writer<Value>
+Writer.of(5);
+    -> Writer<5, []>
+```
+
+- Writer.lift: Takes a function and logs, and wrap the result of the function in a Writer with the given log.
+```ts
+/*
+ * Writer.lift(
+ *     fn: A => B,
+ *     logs: Log[] = []
+ * ): (v: A) => Writer<B, Log>;
+ * */
+
+Writer.lift(v => v * 2, ['doubling the value']>);
+    -> v => Writer(v * 2, ['doubling the value']);
+```
+
+- writer.map: Takes a function and apply it to the writer value. The logs are untouched.
+```ts
+// Writer<A>.map(fn: A => B): Writer<B>;
+Writer(5, ['start with a five']).map(v => v * 2);
+    -> Writer<10, ['start with a five']>
+```
+
+- writer.flatten: If the value is another Writer merge the two together. The logs of both writer will be concatened
+```ts
+// Writer<Reader<A, Log>, Log>.flatten(): Reader<A, Log>;
+Writer(Writer(5, ['a five']), ['another writer']).flatten();
+    -> Writer<5, ['another writer', 'a five']>
+```
+
+- writer.chain: Takes a function returning another writer and return a Writer with the value of the nested Writer, and the logs of both.
+```ts
+// Writer<A>.chain(fn: A => Writer<B>): Writer<B>;
+Writer.of(5, 'a five').chain(v => Writer(v * 2, 'multiply by 2'));
+    -> Writer<10, ['a five', 'multiply by 2']>
+```
+
+- writer.read: return the contained logs and value;
+
+```ts
+// Reader<Value, Log>.read(): { value: Value, log: Log };
+Reader(5, ['a five']).read();
+    -> { value: 5, log: ['a five'] }
+```
+
+- writer.readValue return the value from the reader
+
+```ts
+// Reader<Value, Log>.read(): Value;
+Reader(5, ['a five']).readValue();
+    -> 5
+```
+
+- writer.readLog return the log from the reader
+
+```ts
+// Reader<Value, Log>.read(): Log;
+Reader(5, ['a five']).readLog();
+    -> ['a five']
+```
+
+## State
+
+The State Monad allows us to realize computation on a value while maintaining a state on the side.
+
+### Example
+
+Let us handle a simple form, we want to be able to update the value, or to revert all the change.
+
+```js
+const form = {
+    email: 'john@doe.com',
+    comment: 'no comment',
+};
+
+State.getState()
+    .map(form => ({
+        ...form,
+        comment: 'updated comment',
+    }))
+    .chain(currentForm => State(oldForm => ({ value: , state: oldForm })))
+    .evalState(form);
+
+state.evalState(form);
 ```
