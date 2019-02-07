@@ -4,7 +4,7 @@ import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 
-const getIOValue = <T>(io: IOType<T>) => io.sideEffect();
+const getIOValue = <T>(io: IOType<T>) => io.execute();
 
 describe('IO', () => {
     testFunctorLaw(IO, getIOValue);
@@ -12,13 +12,13 @@ describe('IO', () => {
     testApplicativeLaw(IO, getIOValue);
 
     it('map should be lazy', () => {
-        const gimmeFive = jest.fn(() => 5);
-        const double = jest.fn(v => v * 2);
-        const io = IO.fromSideEffect(gimmeFive).map(double);
+        const gimmeFive = jest.fn(() => 5) as () => number;
+        const double = jest.fn(v => v * 2) as (v: number) => number;
+        const io = IO(gimmeFive).map(double);
         expect(gimmeFive).toHaveBeenCalledTimes(0);
         expect(double).toHaveBeenCalledTimes(0);
 
-        expect(io.sideEffect()).toBe(10);
+        expect(io.execute()).toBe(10);
         expect(gimmeFive).toHaveBeenCalledTimes(1);
         expect(double).toHaveBeenCalledTimes(1);
     });
@@ -26,11 +26,11 @@ describe('IO', () => {
     it('chain should be lazy', () => {
         const gimmeFive = jest.fn(() => 5);
         const double = jest.fn(v => IO.of(v * 2));
-        const io = IO.fromSideEffect(gimmeFive).chain(double);
+        const io = IO(gimmeFive).chain(double);
         expect(gimmeFive).toHaveBeenCalledTimes(0);
         expect(double).toHaveBeenCalledTimes(0);
 
-        expect(io.sideEffect()).toBe(10);
+        expect(io.execute()).toBe(10);
 
         expect(gimmeFive).toHaveBeenCalledTimes(1);
         expect(double).toHaveBeenCalledTimes(1);
@@ -39,11 +39,11 @@ describe('IO', () => {
     it('ap should be lazy', () => {
         const gimmeFive = jest.fn(() => 5);
         const double = jest.fn(() => (a: number) => a * 2);
-        const io = IO.fromSideEffect(double).ap(IO.fromSideEffect(gimmeFive));
+        const io = IO(double).ap(IO(gimmeFive));
         expect(gimmeFive).toHaveBeenCalledTimes(0);
         expect(double).toHaveBeenCalledTimes(0);
 
-        expect(io.sideEffect()).toBe(10);
+        expect(io.execute()).toBe(10);
 
         expect(gimmeFive).toHaveBeenCalledTimes(1);
         expect(double).toHaveBeenCalledTimes(1);
@@ -53,11 +53,7 @@ describe('IO', () => {
         const fn1 = jest.fn(() => 1);
         const fn2 = jest.fn(() => 2);
         const fn3 = jest.fn(() => 3);
-        const list = List.fromArray([
-            IO.fromSideEffect(fn1),
-            IO.fromSideEffect(fn2),
-            IO.fromSideEffect(fn3),
-        ]);
+        const list = List([IO(fn1), IO(fn2), IO(fn3)]);
 
         const io = list.sequence(IO.of);
 
@@ -65,7 +61,7 @@ describe('IO', () => {
         expect(fn2).toBeCalledTimes(0);
         expect(fn3).toBeCalledTimes(0);
 
-        expect(io.sideEffect()).toEqual(List.fromArray([1, 2, 3]));
+        expect(io.execute()).toEqual(List([1, 2, 3]));
 
         expect(fn1).toBeCalledTimes(1);
         expect(fn2).toBeCalledTimes(1);

@@ -4,16 +4,16 @@ class IO<Value> implements Category<Value, 'IO'> {
     public static of<Value>(value: Value): IO<Value> {
         return new IO(() => value);
     }
-    public static fromSideEffect<Value>(sideEffect: () => Value): IO<Value> {
-        return new IO(sideEffect);
-    }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => IO<B> {
         return v => IO.of(fn(v));
     }
     public readonly name: 'IO';
-    public readonly sideEffect: () => Value;
+    private readonly sideEffect: () => Value;
     constructor(sideEffect: () => Value) {
         this.sideEffect = sideEffect;
+    }
+    public execute() {
+        return this.sideEffect();
     }
     public map<A, B>(this: IO<A>, fn: (v: A) => B): IO<B> {
         return new IO(() => fn(this.sideEffect()));
@@ -31,8 +31,8 @@ class IO<Value> implements Category<Value, 'IO'> {
 
 export type IOType<Value> = IO<Value>;
 
-export default {
-    fromSideEffect: IO.fromSideEffect,
-    of: IO.of,
-    lift: IO.lift,
-};
+const IOExport = <Value>(sideEffect: () => Value) => new IO(sideEffect);
+IOExport.of = IO.of;
+IOExport.lift = IO.lift;
+
+export default IOExport;

@@ -45,7 +45,8 @@ class Identity<Value> implements Category<Value, 'Identity'> {
 
 export type IdentityType<Value> = Identity<Value>;
 
-export default {
-    of: Identity.of,
-    lift: Identity.lift,
-};
+const IdentityExport = <Value>(value: Value) => new Identity(value);
+IdentityExport.of = Identity.of;
+IdentityExport.lift = Identity.lift;
+
+export default IdentityExport;

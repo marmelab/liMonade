@@ -34,7 +34,7 @@ describe('IO', () => {
         const fn1 = jest.fn((operation: (v: number) => number) => operation(1));
         const fn2 = jest.fn((operation: (v: number) => number) => operation(2));
         const fn3 = jest.fn((operation: (v: number) => number) => operation(3));
-        const list = List.fromArray([Reader(fn1), Reader(fn2), Reader(fn3)]);
+        const list = List([Reader(fn1), Reader(fn2), Reader(fn3)]);
 
         const reader = list.sequence(Reader.of);
 
@@ -43,7 +43,7 @@ describe('IO', () => {
         expect(fn3).toBeCalledTimes(0);
 
         expect(reader.computation((v: number) => v * 2)).toEqual(
-            List.fromArray([2, 4, 6]),
+            List([2, 4, 6]),
         );
 
         expect(fn1).toBeCalledTimes(1);
@@ -51,7 +51,7 @@ describe('IO', () => {
         expect(fn3).toBeCalledTimes(1);
 
         expect(reader.computation((v: number) => v + 1)).toEqual(
-            List.fromArray([2, 3, 4]),
+            List([2, 3, 4]),
         );
 
         expect(fn1).toBeCalledTimes(2);

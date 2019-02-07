@@ -22,7 +22,7 @@ describe('Writer', () => {
     });
 
     it('should allow to convert a list of writer into a writer of list while preserving log', () => {
-        const list = List.fromArray([
+        const list = List([
             Writer(1, ['log 1']),
             Writer(2, ['log 2', 'log 3']),
             Writer(3, ['log 4']),
@@ -32,6 +32,6 @@ describe('Writer', () => {
 
         expect(writer.readLog()).toEqual(['log 4', 'log 2', 'log 3', 'log 1']);
 
-        expect(writer.readValue()).toEqual(List.fromArray([1, 2, 3]));
+        expect(writer.readValue()).toEqual(List([1, 2, 3]));
     });
 });

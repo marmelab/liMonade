@@ -135,9 +135,10 @@ export type EitherType<Value, Type extends 'Left' | 'Right'> = Either<
     Type
 >;
 
-export default {
-    of: Either.of,
-    lift: Either.lift,
-    Left: Either.Left,
-    Right: Either.Right,
-};
+const EitherExport = <Value>(value: Value) => new Either(value);
+EitherExport.of = Either.of;
+EitherExport.lift = Either.lift;
+EitherExport.Left = Either.Left;
+EitherExport.Right = Either.Right;
+
+export default EitherExport;

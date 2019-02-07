@@ -28,12 +28,12 @@ export const testTraversableLaw = <Name>(
             expect(
                 await getValue(
                     Identity.of(Either.of(Testee.of(true)))
-                        .map(v => Compose.create(v))
+                        .map(v => Compose(v))
                         .sequence(v => Compose.of(v, Either, Testee)),
                 ),
             ).toEqual(
                 await getValue(
-                    Compose.create(
+                    Compose(
                         // @ts-ignore
                         Identity.of(Either.of(Testee.of(true)))
                             .sequence(Either.of)

@@ -105,7 +105,8 @@ export class Maybe<Value> implements Category<Value, 'Maybe'> {
 
 export type MaybeType<Value> = Maybe<Value>;
 
-export default {
-    of: Maybe.of,
-    list: Maybe.lift,
-};
+const MaybeExport = <Value>(value: Value) => new Maybe(value);
+MaybeExport.of = Maybe.of;
+MaybeExport.lift = Maybe.lift;
+
+export default MaybeExport;

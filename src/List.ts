@@ -74,8 +74,11 @@ export class List<Value> implements Category<Value, 'List'> {
 
 export type ListType<Value> = List<Value>;
 
-export default {
-    of: List.of,
-    fromArray: List.fromArray,
-    lift: List.lift,
-};
+export type IdentityType<Value> = List<Value>;
+
+const ListExport = <Value>(value: Value[]) => new List(value);
+ListExport.of = List.of;
+ListExport.lift = List.lift;
+ListExport.fromArray = List.fromArray;
+
+export default ListExport;

@@ -38,9 +38,10 @@ class Compose<Value, N1, N2> implements Category<Value, 'Compose'> {
 
 export type IdentityType<Value, N1, N2> = Compose<Value, N1, N2>;
 
-export default {
-    of: Compose.of,
-    create: <Value, N1, N2>(
-        v: InferCategory<InferCategory<Value, N2>, N1>,
-    ): Compose<Value, N1, N2> => new Compose(v),
-};
+const ComposeExport = <Value, N1, N2>(
+    value: InferCategory<InferCategory<Value, N2>, N1>,
+) => new Compose<Value, N1, N2>(value);
+
+ComposeExport.of = Compose.of;
+
+export default ComposeExport;

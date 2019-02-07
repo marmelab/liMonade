@@ -93,7 +93,7 @@ describe('Task', () => {
         const fn1 = jest.fn(resolve => setTimeout(() => resolve(1), 1));
         const fn2 = jest.fn(resolve => setTimeout(() => resolve(2), 2));
         const fn3 = jest.fn(resolve => setTimeout(() => resolve(3), 3));
-        const list = List.fromArray([Task(fn1), Task(fn2), Task(fn3)]);
+        const list = List([Task(fn1), Task(fn2), Task(fn3)]);
 
         const io = list.sequence(Task.of);
 
@@ -101,7 +101,7 @@ describe('Task', () => {
         expect(fn2).toBeCalledTimes(0);
         expect(fn3).toBeCalledTimes(0);
 
-        expect(await io.toPromise()).toEqual(List.fromArray([1, 2, 3]));
+        expect(await io.toPromise()).toEqual(List([1, 2, 3]));
 
         expect(fn1).toBeCalledTimes(1);
         expect(fn2).toBeCalledTimes(1);
