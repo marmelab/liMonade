@@ -28,7 +28,7 @@ export type InferCategory<Value, Name> = Name extends 'Either'
     : Name extends 'Writer'
     ? WriterType<Value>
     : Name extends 'Compose'
-    ? ComposeType<Value>
+    ? ComposeType<Value, any, any>
     : any;
 
 export interface Category<Value, Name> {

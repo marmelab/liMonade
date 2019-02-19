@@ -36,7 +36,7 @@ class Compose<Value, N1, N2> implements Category<Value, 'Compose'> {
     }
 }
 
-export type IdentityType<Value, N1, N2> = Compose<Value, N1, N2>;
+export type ComposeType<Value, N1, N2> = Compose<Value, N1, N2>;
 
 const ComposeExport = <Value, N1, N2>(
     value: InferCategory<InferCategory<Value, N2>, N1>,
