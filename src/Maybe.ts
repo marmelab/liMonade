@@ -67,40 +67,40 @@ export class Maybe<Value> implements Category<Value, 'Maybe'> {
     public getOrElse<A>(_: A): Value {
         return this.value;
     }
-    public traverse<A, B, N>(
+    public traverse<A, B, Name>(
         this: Maybe<A>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: Maybe<nothing>) => Category<Maybe<nothing>, N>,
-    ): InferCategory<Maybe<B>, N>;
-    public traverse<A, B, N>(
+        fn: (v: A) => Category<B, Name>,
+        of: (v: Maybe<nothing>) => Category<Maybe<nothing>, Name>,
+    ): InferCategory<Maybe<B>, Name>;
+    public traverse<A, B, Name>(
         this: Maybe<nothing>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: Maybe<nothing>) => Category<Maybe<nothing>, N>,
-    ): InferCategory<Maybe<nothing>, N>;
-    public traverse<A, B, N>(
+        fn: (v: A) => Category<B, Name>,
+        of: (v: Maybe<nothing>) => Category<Maybe<nothing>, Name>,
+    ): InferCategory<Maybe<nothing>, Name>;
+    public traverse<A, B, Name>(
         this: Maybe<A> | Maybe<nothing>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: Maybe<nothing>) => Category<Maybe<nothing>, N>,
-    ): InferCategory<Maybe<B>, N> | InferCategory<Maybe<nothing>, N> {
+        fn: (v: A) => Category<B, Name>,
+        of: (v: Maybe<nothing>) => Category<Maybe<nothing>, Name>,
+    ): InferCategory<Maybe<B>, Name> | InferCategory<Maybe<nothing>, Name> {
         return this.isNothing()
             ? of(this)
-            : (fn(this.value) as InferCategory<A, N>).map(Maybe.of);
+            : (fn(this.value) as InferCategory<A, Name>).map(Maybe.of);
     }
-    public sequence<A, N>(
-        this: Maybe<Category<A, N>>,
+    public sequence<A, Name>(
+        this: Maybe<Category<A, Name>>,
         of: (v: any) => any,
-    ): InferCategory<Maybe<A>, N>;
-    public sequence<A, N>(
+    ): InferCategory<Maybe<A>, Name>;
+    public sequence<A, Name>(
         this: Maybe<nothing>,
-        of: (v: any) => Category<any, N>,
-    ): InferCategory<Maybe<nothing>, N>;
-    public sequence<A, N>(
-        this: Maybe<Category<A, N>> | Maybe<nothing>,
-        of: (v: any) => Category<Maybe<any>, N>,
-    ): InferCategory<Maybe<A>, N> | InferCategory<Maybe<nothing>, N> {
+        of: (v: any) => Category<any, Name>,
+    ): InferCategory<Maybe<nothing>, Name>;
+    public sequence<A, Name>(
+        this: Maybe<Category<A, Name>> | Maybe<nothing>,
+        of: (v: any) => Category<Maybe<any>, Name>,
+    ): InferCategory<Maybe<A>, Name> | InferCategory<Maybe<nothing>, Name> {
         return this.isNothing()
             ? of(this)
-            : (this.value as InferCategory<A, N>).map(Maybe.of);
+            : (this.value as InferCategory<A, Name>).map(Maybe.of);
     }
 }
 

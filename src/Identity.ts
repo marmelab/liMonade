@@ -29,18 +29,18 @@ class Identity<Value> implements Category<Value, 'Identity'> {
     ): Identity<B> {
         return this.chain(fn => other.map(fn));
     }
-    public traverse<A, B, N>(
+    public traverse<A, B, Name>(
         this: Identity<A>,
-        fn: (v: A) => Category<B, N>,
+        fn: (v: A) => Category<B, Name>,
         _: (v: any) => any,
-    ): InferCategory<Identity<B>, N> {
-        return (fn(this.value) as InferCategory<B, N>).map(Identity.of);
+    ): InferCategory<Identity<B>, Name> {
+        return (fn(this.value) as InferCategory<B, Name>).map(Identity.of);
     }
-    public sequence<A, N>(
-        this: Identity<Category<A, N>>,
+    public sequence<A, Name>(
+        this: Identity<Category<A, Name>>,
         of: (v: any) => any,
-    ): InferCategory<Identity<A>, N> {
-        return this.traverse((v: Category<A, N>) => v, of);
+    ): InferCategory<Identity<A>, Name> {
+        return this.traverse((v: Category<A, Name>) => v, of);
     }
 }
 

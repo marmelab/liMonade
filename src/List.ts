@@ -1,10 +1,9 @@
 import { Category, InferCategory } from './types';
 
-const swap = <A, N, T>(fn: (v: T) => Category<A, N>) => (
-    traversable: Category<List<A>, N>,
-    applicative: T,
-) =>
-    (fn(applicative) as InferCategory<A, N>)
+const swap = <A, Name, Applicative>(
+    fn: (v: Applicative) => Category<A, Name>,
+) => (traversable: Category<List<A>, Name>, applicative: Applicative) =>
+    (fn(applicative) as InferCategory<A, Name>)
         .map((v: A) => (w: List<A>) => {
             return w.concat(v);
         })
@@ -58,18 +57,18 @@ export class List<Value> implements Category<Value, 'List'> {
         );
     }
 
-    public traverse<A, B, N>(
+    public traverse<A, B, Name>(
         this: List<A>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: List<A>) => Category<List<A>, N>,
-    ): InferCategory<List<B>, N> {
+        fn: (v: A) => Category<B, Name>,
+        of: (v: List<A>) => Category<List<A>, Name>,
+    ): InferCategory<List<B>, Name> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
 
-    public sequence<A, N>(
-        this: List<Category<A, N>>,
+    public sequence<A, Name>(
+        this: List<Category<A, Name>>,
         of: any,
-    ): InferCategory<List<A>, N> {
+    ): InferCategory<List<A>, Name> {
         return this.traverse((v: any) => v, of);
     }
 }

@@ -94,40 +94,40 @@ class Either<Value, Type extends 'Left' | 'Right'>
         }
         return other.isLeft() ? other : other.map(this.value);
     }
-    public traverse<A, B, N>(
+    public traverse<A, B, Name>(
         this: Right<A>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: Left<Error>) => Category<Left<Error>, N>,
-    ): InferCategory<Right<A>, N>;
-    public traverse<A, B, N>(
+        fn: (v: A) => Category<B, Name>,
+        of: (v: Left<Error>) => Category<Left<Error>, Name>,
+    ): InferCategory<Right<A>, Name>;
+    public traverse<A, B, Name>(
         this: Left<A>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: Left<A>) => Category<Left<Error>, N>,
-    ): InferCategory<Left<A>, N>;
-    public traverse<A, B, N>(
+        fn: (v: A) => Category<B, Name>,
+        of: (v: Left<A>) => Category<Left<Error>, Name>,
+    ): InferCategory<Left<A>, Name>;
+    public traverse<A, B, Name>(
         this: Right<A> | Left<Error>,
-        fn: (v: A) => Category<B, N>,
-        of: (v: Left<Error>) => Category<Left<Error>, N>,
-    ): InferCategory<Right<A>, N> {
+        fn: (v: A) => Category<B, Name>,
+        of: (v: Left<Error>) => Category<Left<Error>, Name>,
+    ): InferCategory<Right<A>, Name> {
         return this.isLeft()
             ? of(this)
-            : (fn(this.value) as InferCategory<A, N>).map(Either.of);
+            : (fn(this.value) as InferCategory<A, Name>).map(Either.of);
     }
-    public sequence<A, N>(
-        this: Right<Category<A, N>>,
+    public sequence<A, Name>(
+        this: Right<Category<A, Name>>,
         of: (v: any) => any,
-    ): InferCategory<Right<A>, N>;
-    public sequence<A, N>(
+    ): InferCategory<Right<A>, Name>;
+    public sequence<A, Name>(
         this: Left<Error>,
         of: (v: any) => any,
-    ): InferCategory<Left<Error>, N>;
-    public sequence<A, N>(
-        this: Right<Category<A, N>> | Left<Error>,
+    ): InferCategory<Left<Error>, Name>;
+    public sequence<A, Name>(
+        this: Right<Category<A, Name>> | Left<Error>,
         of: (v: any) => any,
-    ): InferCategory<Right<A>, N> | Category<Left<Error>, N> {
+    ): InferCategory<Right<A>, Name> | Category<Left<Error>, Name> {
         return this.isLeft()
             ? of(this)
-            : (this.value as InferCategory<A, N>).map(Either.of);
+            : (this.value as InferCategory<A, Name>).map(Either.of);
     }
 }
 
