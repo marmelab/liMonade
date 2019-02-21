@@ -31,6 +31,15 @@ export type InferCategory<Value, Name> = Name extends 'Either'
     ? ComposeType<Value, any, any>
     : any;
 
+export type InferCategoryValue<CategoryClass> = CategoryClass extends Category<
+    infer Value,
+    any
+>
+    ? Value
+    : any;
+
 export interface Category<Value, Name> {
     readonly name: Name;
+    // We need to have Value used in a Category property for typescript inferrence to work properly
+    readonly V: Value;
 }

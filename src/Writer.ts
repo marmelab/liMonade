@@ -8,6 +8,7 @@ class Writer<Value> implements Category<Value, 'Writer'> {
         return v => Writer.of(fn(v));
     }
     public readonly name: 'Writer';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     private readonly value: Value;
     private readonly log: any[];
     constructor(value: Value, log: any[] = []) {

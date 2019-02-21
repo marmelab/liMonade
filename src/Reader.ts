@@ -11,6 +11,7 @@ class Reader<Value, Dependencies> implements Category<Value, 'Reader'> {
         return v => Reader.of(fn(v));
     }
     public readonly name: 'Reader';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly computation: (v: Dependencies) => Value;
     constructor(computation: (v: Dependencies) => Value) {
         this.computation = computation;

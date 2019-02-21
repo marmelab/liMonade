@@ -8,6 +8,7 @@ class IO<Value> implements Category<Value, 'IO'> {
         return v => IO.of(fn(v));
     }
     public readonly name: 'IO';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     private readonly sideEffect: () => Value;
     constructor(sideEffect: () => Value) {
         this.sideEffect = sideEffect;

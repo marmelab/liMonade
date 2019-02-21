@@ -21,6 +21,8 @@ export class List<Value> implements Category<Value, 'List'> {
         return new List(value);
     }
     public readonly name: 'List';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    public readonly Value: Value;
     private readonly values: ReadonlyArray<Value>;
     constructor(values: ReadonlyArray<Value>) {
         this.values = values;

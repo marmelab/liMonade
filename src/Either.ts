@@ -31,8 +31,9 @@ class Either<Value, Type extends 'Left' | 'Right'>
     public static Left(error: Error): Left<Error> {
         return new Either(error, 'Left');
     }
-    public readonly value: Value;
     public readonly name: 'Either';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    public readonly value: Value;
     private readonly type: Type;
     constructor(value: Value, type: Type = 'Right' as Type) {
         this.value = value;

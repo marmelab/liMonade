@@ -22,6 +22,7 @@ class State<Value, Status> implements Category<Value, 'State'> {
         return State.getState().chain((state: A) => State.of(f(state)));
     }
     public readonly name: 'State';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly runState: (v: Status) => { value: Value; state: Status };
     constructor(runState: (v: Status) => { value: Value; state: Status }) {
         this.runState = runState;

@@ -8,7 +8,8 @@ class Identity<Value> implements Category<Value, 'Identity'> {
         return v => new Identity(fn(v));
     }
     public readonly name: 'Identity';
-    private readonly value: Value;
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    public readonly value: Value;
     constructor(value: Value) {
         this.value = value;
         this.name = 'Identity';

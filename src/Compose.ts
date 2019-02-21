@@ -16,6 +16,7 @@ class Compose<Value, N1, N2> implements Category<Value, 'Compose'> {
         return new Compose(F.of(G.of(value)));
     }
     public readonly name = 'Compose';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     private readonly value: InferCategory<InferCategory<Value, N2>, N1>;
     constructor(value: InferCategory<InferCategory<Value, N2>, N1>) {
         this.value = value;

@@ -11,6 +11,7 @@ class Task<Value> implements Category<Value, 'Task'> {
         return v => Task.of(fn(v));
     }
     public readonly name: 'Task';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly cps: (
         resolve: (v: Value) => void,
         reject?: (v: Error) => void,

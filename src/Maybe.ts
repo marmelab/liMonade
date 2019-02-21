@@ -11,8 +11,9 @@ export class Maybe<Value> implements Category<Value, 'Maybe'> {
     ): (v: A) => Maybe<B> | Maybe<never> {
         return v => new Maybe(fn(v));
     }
-    public readonly value: Value;
     public readonly name: 'Maybe';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    public readonly value: Value;
     constructor(value: Value) {
         this.value = value;
     }
