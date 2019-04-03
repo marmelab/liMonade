@@ -30,7 +30,7 @@ export class List<Value> implements Category<Value, 'List'> {
         return this.values;
     }
     public concat(x: Value): List<Value> {
-        return new List(this.values.concat(x));
+        return new List([...this.values, x]);
     }
 
     public map<A, B>(this: List<A>, fn: (v: A) => B): List<B> {

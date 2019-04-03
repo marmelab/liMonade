@@ -1,3 +1,4 @@
+import * as fc from 'fast-check';
 import Compose from '../Compose';
 import Either, { Left, Right } from '../Either';
 import Identity, { IdentityType } from '../Identity';
@@ -14,15 +15,18 @@ export const testTraversableLaw = <Name>(
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Traversable Law', () => {
-        it('Identity', async () => {
-            expect(
-                await getValue(
-                    Testee.of('value')
-                        .map(Identity.of)
-                        .sequence(Identity.of),
-                ),
-            ).toEqual(await getValue(Identity.of(Testee.of('value'))));
-        });
+        it('Identity', async () =>
+            fc.assert(
+                fc.asyncProperty(fc.anything(), async x => {
+                    expect(
+                        await getValue(
+                            Testee.of(x)
+                                .map(Identity.of)
+                                .sequence(Identity.of),
+                        ),
+                    ).toEqual(await getValue(Identity.of(Testee.of(x))));
+                }),
+            ));
 
         it('Composition', async () => {
             expect(
