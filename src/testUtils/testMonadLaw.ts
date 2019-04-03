@@ -7,7 +7,7 @@ export const testMonadLaw = <Name>(
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Monad Laws', () => {
-        it('.chain should be associative', async () => {
+        it('.chain should be associative', async () =>
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
@@ -33,20 +33,18 @@ export const testMonadLaw = <Name>(
                         );
                     },
                 ),
-            );
-        });
+            ));
 
-        it('.chain should follow the Right identity law', async () => {
+        it('.chain should follow the Right identity law', async () =>
             fc.assert(
                 fc.asyncProperty(fc.anything(), async x => {
                     expect(
                         await getValue(Testee.of(x).chain(Testee.of)),
                     ).toEqual(await getValue(Testee.of(x)));
                 }),
-            );
-        });
+            ));
 
-        it('.chain should follow the Left identity law', async () => {
+        it('.chain should follow the Left identity law', async () =>
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
@@ -59,7 +57,6 @@ export const testMonadLaw = <Name>(
                         ).toEqual(await getValue(liftedFn(x)));
                     },
                 ),
-            );
-        });
+            ));
     });
 };

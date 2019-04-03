@@ -9,7 +9,7 @@ export const testFunctorLaw = <Name>(
     getValue: (v: any) => any = v => v,
 ) => {
     describe('Functor Laws', () => {
-        it('Composition with number', () => {
+        it('Composition with number', () =>
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
@@ -33,17 +33,15 @@ export const testFunctorLaw = <Name>(
                         );
                     },
                 ),
-            );
-        });
+            ));
 
-        it('Identity', async () => {
+        it('Identity', async () =>
             fc.assert(
                 fc.asyncProperty(fc.anything(), async x => {
                     expect(await getValue(Testee.of(x).map(identity))).toEqual(
                         await getValue(Testee.of(x)),
                     );
                 }),
-            );
-        });
+            ));
     });
 };
