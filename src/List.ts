@@ -1,13 +1,15 @@
 import { Category, InferCategory } from './types';
 
-const swap = <A, Name, Applicative>(
-    fn: (v: Applicative) => Category<A, Name>,
-) => (traversable: Category<List<A>, Name>, applicative: Applicative) =>
-    (fn(applicative) as InferCategory<A, Name>)
+const swap = <A, Name, Value>(fn: (v: Value) => Category<A, Name>) => (
+    traversable: Category<List<A>, Name>,
+    value: Value,
+) => {
+    return (fn(value) as InferCategory<A, Name>)
         .map((v: A) => (w: List<A>) => {
             return w.concat(v);
         })
         .ap(traversable);
+};
 
 export class List<Value> implements Category<Value, 'List'> {
     public static of<Value>(value: Value): List<Value> {

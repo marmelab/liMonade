@@ -16,6 +16,13 @@ class Compose<Value, OuterName, InnerName>
     ): Compose<Value, OuterName, InnerName> {
         return new Compose(F.of(G.of(value)));
     }
+    public static lift<A, B, OuterName, InnerName>(
+        fn: (v: A) => B,
+        F: Pointed<OuterName>,
+        G: Pointed<InnerName>,
+    ): (v: A) => Compose<B, OuterName, InnerName> {
+        return v => Compose.of(fn(v), F, G);
+    }
     public readonly name = 'Compose';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
     private readonly value: InferCategory<
@@ -32,18 +39,27 @@ class Compose<Value, OuterName, InnerName>
         fn: (v: A) => B,
     ): Compose<B, OuterName, InnerName> {
         return new Compose(
-            this.value.map((x: InferCategory<A, InnerName>) => x.map(fn)),
+            this.value.map((x: InferCategory<A, InnerName>) => {
+                return x.map(fn);
+            }),
         );
     }
     public ap<A, B>(
         this: Compose<(v: A) => B, OuterName, InnerName>,
         other: Compose<A, OuterName, InnerName>,
     ): Compose<B, OuterName, InnerName> {
-        return this.map(fn => other.map(fn).value) as Compose<
-            B,
-            OuterName,
-            InnerName
-        >;
+        return new Compose(
+            other.value
+                .map(
+                    (u: InferCategory<A, InnerName>) => (
+                        y: InferCategory<
+                            InferCategory<(v: A) => B, InnerName>,
+                            InnerName
+                        >,
+                    ) => y.ap(u),
+                )
+                .ap(this.value),
+        ) as Compose<B, OuterName, InnerName>;
     }
 }
 
@@ -53,10 +69,16 @@ export type ComposeType<Value, OuterName, InnerName> = Compose<
     InnerName
 >;
 
-const ComposeExport = <Value, OuterName, InnerName>(
-    value: InferCategory<InferCategory<Value, InnerName>, OuterName>,
-) => new Compose<Value, OuterName, InnerName>(value);
+export default <Value, OuterName, InnerName>(
+    F: Pointed<OuterName>,
+    G: Pointed<InnerName>,
+) => {
+    const ComposeExport = (
+        value: InferCategory<InferCategory<Value, InnerName>, OuterName>,
+    ) => new Compose<Value, OuterName, InnerName>(value);
 
-ComposeExport.of = Compose.of;
+    ComposeExport.of = (v: Value) => Compose.of(v, F, G);
+    ComposeExport.lift = <A, B>(fn: (v: A) => B) => Compose.lift(fn, F, G);
 
-export default ComposeExport;
+    return ComposeExport;
+};

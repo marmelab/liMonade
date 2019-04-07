@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import Compose from '../Compose';
+import getCompose from '../Compose';
 import Either, { Left, Right } from '../Either';
 import Identity from '../Identity';
 import Maybe, { MaybeType } from '../Maybe';
@@ -29,74 +29,29 @@ export const testTraversableLaw = <Name>(
                 }),
             ));
 
-        it.only('Composition', async () => {
-            return fc.assert(
-                fc.asyncProperty(fc.constant(true), async x => {
-                    console.log(Testee);
-                    // console.log(Testee.of(x));
-                    console.log(
-                        Testee.of(x).traverse(
-                            (v: any) => Compose.of(v, Either, Identity),
-                            (v: any) => Compose.of(v, Either, Identity),
-                        ).value,
-                    );
-                    console.log(
-                        JSON.stringify(
-                            Testee.of(x).traverse(
-                                (v: any) => Compose.of(v, Either, Identity),
-                                (v: any) => Compose.of(v, Either, Identity),
-                            ),
-                        ),
-                    );
-                    console.log(
-                        JSON.stringify(
-                            Testee.of(x)
-                                .traverse(Either.of, Either.of)
-                                .map((v: any) =>
-                                    v.traverse(Identity.of, Identity.of),
-                                ),
-                        ),
-                    );
-                    expect(
-                        await getValue(
-                            Testee.of(x).traverse(
-                                (v: any) => Compose.of(v, Either, Identity),
-                                (v: any) => Compose.of(v, Either, Identity),
-                            ),
-                        ),
-                    ).toEqual(
-                        await getValue(
-                            Compose(
-                                Testee.of(x)
-                                    .traverse(Either.of, Either.of)
-                                    .map((v: any) =>
-                                        v.traverse(Identity.of, Identity.of),
-                                    ),
-                            ),
-                        ),
-                    );
-                }),
-            );
-        });
-
-        it.skip('Composition', async () => {
+        it('Composition', async () => {
             return fc.assert(
                 fc.asyncProperty(
-                    fc.integer(),
+                    fc.constant(true),
                     randomApplicative,
                     randomApplicative,
-                    async (x, ap1: any, ap2: any) => {
-                        const composeOf = (v: any) => Compose.of(v, ap1, ap2);
+                    async (x, ap1: Pointed<any>, ap2: Pointed<any>) => {
+                        const Compose = getCompose(ap1, ap2);
                         expect(
-                            await getValue(Testee.of(x).sequence(composeOf)),
+                            await getValue(
+                                Testee.of(x).traverse(
+                                    (v: any) => Compose.of(v),
+                                    (v: any) => Compose.of(v),
+                                ),
+                            ),
                         ).toEqual(
                             await getValue(
                                 Compose(
                                     Testee.of(x)
-                                        .sequence(ap1.of)
-                                        .map((v: any) => {
-                                            return v.sequence(ap2.of);
-                                        }),
+                                        .traverse(ap1.of, ap1.of)
+                                        .map((v: any) =>
+                                            v.traverse(ap2.of, ap2.of),
+                                        ),
                                 ),
                             ),
                         );
