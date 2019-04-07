@@ -4,6 +4,7 @@ import Either, { Left, Right } from '../Either';
 import Identity from '../Identity';
 import Maybe, { MaybeType } from '../Maybe';
 import { InferCategory } from '../types';
+import getComparableValue from './getComparableValue';
 import randomApplicative from './randomApplicative';
 
 interface Pointed<Name> {
@@ -13,7 +14,7 @@ interface Pointed<Name> {
 
 export const testTraversableLaw = <Name>(
     Testee: Pointed<Name>,
-    getValue: (v: any) => any = v => v,
+    getValue = getComparableValue,
 ) => {
     describe('Traversable Law', () => {
         it('Identity', async () =>
@@ -32,7 +33,7 @@ export const testTraversableLaw = <Name>(
         it('Composition', async () => {
             return fc.assert(
                 fc.asyncProperty(
-                    fc.constant(true),
+                    fc.anything().filter(v => v !== null && v !== undefined),
                     randomApplicative,
                     randomApplicative,
                     async (x, ap1: Pointed<any>, ap2: Pointed<any>) => {

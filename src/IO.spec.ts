@@ -1,15 +1,15 @@
-import IO, { IOType } from './IO';
+import IO from './IO';
 import List from './List';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 
-const getIOValue = <T>(io: IOType<T>) => io.execute();
+// const getIOValue = <T>(io: IOType<T>) => io.execute();
 
 describe('IO', () => {
-    testFunctorLaw(IO, getIOValue);
-    testMonadLaw(IO, getIOValue);
-    testApplicativeLaw(IO, getIOValue);
+    testFunctorLaw(IO);
+    testMonadLaw(IO);
+    testApplicativeLaw(IO);
 
     it('map should be lazy', () => {
         const gimmeFive = jest.fn(() => 5) as () => number;

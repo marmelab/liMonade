@@ -7,12 +7,11 @@ class Identity<Value> implements Category<Value, 'Identity'> {
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Identity<B> {
         return v => new Identity(fn(v));
     }
-    public readonly name: 'Identity';
+    public readonly name = 'Identity';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly value: Value;
     constructor(value: Value) {
         this.value = value;
-        this.name = 'Identity';
     }
     public map<A, B>(this: Identity<A>, fn: (v: A) => B): Identity<B> {
         return new Identity(fn(this.value));

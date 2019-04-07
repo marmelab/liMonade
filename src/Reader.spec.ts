@@ -1,19 +1,16 @@
 import List from './List';
-import Reader, { ReaderType } from './Reader';
+import Reader from './Reader';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
-
-const getReaderValue = <T>(reader: ReaderType<T, number>) =>
-    reader.computation(5);
 
 describe('IO', () => {
     const double = (v: number) => v * 2;
     const increment = (v: number) => v + 1;
 
-    testFunctorLaw(Reader, getReaderValue);
-    testMonadLaw(Reader, getReaderValue);
-    testApplicativeLaw(Reader, getReaderValue);
+    testFunctorLaw(Reader);
+    testMonadLaw(Reader);
+    testApplicativeLaw(Reader);
 
     it('ask should allow to pass the dependencies as value', () => {
         const reader = Reader.ask().map(v => `my dependencies are ${v}`);

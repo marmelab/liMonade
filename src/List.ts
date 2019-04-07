@@ -21,7 +21,7 @@ export class List<Value> implements Category<Value, 'List'> {
     public static fromArray<Value>(value: Value[]): List<Value> {
         return new List(value);
     }
-    public readonly name: 'List';
+    public readonly name = 'List';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly Value: Value;
     private readonly values: ReadonlyArray<Value>;

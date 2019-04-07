@@ -7,7 +7,7 @@ class IO<Value> implements Category<Value, 'IO'> {
     public static lift<A, B>(fn: (v: A) => B): (v: A) => IO<B> {
         return v => IO.of(fn(v));
     }
-    public readonly name: 'IO';
+    public readonly name = 'IO';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
     private readonly sideEffect: () => Value;
     constructor(sideEffect: () => Value) {

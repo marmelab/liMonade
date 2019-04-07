@@ -1,5 +1,6 @@
 import * as fc from 'fast-check';
 import { InferCategory } from '../types';
+import getComparableValue from './getComparableValue';
 import numberOperation from './numberOperation';
 
 interface Pointed<Name> {
@@ -8,7 +9,7 @@ interface Pointed<Name> {
 
 export const testApplicativeLaw = <Name>(
     Testee: Pointed<Name>,
-    getValue: (v: any) => any = v => v,
+    getValue = getComparableValue,
 ) => {
     describe('Applicative Functor Law', () => {
         const identity = <T>(v: T): T => v;

@@ -4,12 +4,10 @@ import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 
-const getTaskValue = async <T>(task: Task<T>) => task.toPromise();
-
 describe('Task', () => {
-    testFunctorLaw(Task, getTaskValue);
-    testMonadLaw(Task, getTaskValue);
-    testApplicativeLaw(Task, getTaskValue);
+    testFunctorLaw(Task);
+    testMonadLaw(Task);
+    testApplicativeLaw(Task);
 
     it('should allow to chain async operation lazily', async () => {
         const double = jest.fn((v: number) =>

@@ -7,9 +7,9 @@ class Writer<Value> implements Category<Value, 'Writer'> {
     public static lift<A, B>(fn: (v: A) => B): (v: A) => Writer<B> {
         return v => Writer.of(fn(v));
     }
-    public readonly name: 'Writer';
+    public readonly name = 'Writer';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
-    private readonly value: Value;
+    public readonly value: Value;
     private readonly log: any[];
     constructor(value: Value, log: any[] = []) {
         this.value = value;
