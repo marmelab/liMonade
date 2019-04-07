@@ -12,13 +12,11 @@ export const testMonadLaw = <Name>(
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
-                    fc.integer(),
-                    fc.integer(),
                     numberOperation,
                     numberOperation,
-                    async (x, y, z, fn1, fn2) => {
-                        const liftedFn1 = Testee.lift(fn1(y));
-                        const liftedFn2 = Testee.lift(fn2(z));
+                    async (x, fn1, fn2) => {
+                        const liftedFn1 = Testee.lift(fn1);
+                        const liftedFn2 = Testee.lift(fn2);
                         expect(
                             await getValue(
                                 Testee.of(x)
@@ -49,10 +47,9 @@ export const testMonadLaw = <Name>(
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
-                    fc.integer(),
                     numberOperation,
-                    async (x, y, fn) => {
-                        const liftedFn = Testee.lift(fn(y));
+                    async (x, fn) => {
+                        const liftedFn = Testee.lift(fn);
                         expect(
                             await getValue(Testee.of(x).chain(liftedFn)),
                         ).toEqual(await getValue(liftedFn(x)));

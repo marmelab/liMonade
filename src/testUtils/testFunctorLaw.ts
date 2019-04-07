@@ -14,22 +14,18 @@ export const testFunctorLaw = <Name>(
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
-                    fc.integer(),
-                    fc.integer(),
                     numberOperation,
                     numberOperation,
-                    async (x, y, z, f1, f2) => {
+                    async (x, f1, f2) => {
                         expect(
                             await getValue(
                                 Testee.of(x)
-                                    .map(f1(y))
-                                    .map(f2(z)),
+                                    .map(f1)
+                                    .map(f2),
                             ),
                         ).toEqual(
                             await getValue(
-                                Testee.of(x).map((v: number) =>
-                                    f2(z)(f1(y)(v)),
-                                ),
+                                Testee.of(x).map((v: number) => f2(f1(v))),
                             ),
                         );
                     },

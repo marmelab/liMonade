@@ -27,10 +27,8 @@ export const testApplicativeLaw = <Name>(
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
-                    fc.integer(),
                     numberOperation,
-                    async (x, y, getFn) => {
-                        const fn = getFn(y);
+                    async (x, fn) => {
                         expect(
                             await getValue(Testee.of(fn).ap(Testee.of(x))),
                         ).toEqual(await getValue(Testee.of(fn(x))));
@@ -42,10 +40,8 @@ export const testApplicativeLaw = <Name>(
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
-                    fc.integer(),
                     numberOperation,
-                    async (x, y, getFn) => {
-                        const fn = getFn(y);
+                    async (x, fn) => {
                         expect(
                             await getValue(Testee.of(fn).ap(Testee.of(x))),
                         ).toEqual(await getValue(Testee.of(x).map(fn)));
@@ -57,13 +53,11 @@ export const testApplicativeLaw = <Name>(
             fc.assert(
                 fc.asyncProperty(
                     fc.integer(),
-                    fc.integer(),
-                    fc.integer(),
                     numberOperation,
                     numberOperation,
-                    async (x, y, z, fn1, fn2) => {
-                        const u = Testee.of(fn1(y));
-                        const v = Testee.of(fn2(z));
+                    async (x, fn1, fn2) => {
+                        const u = Testee.of(fn1);
+                        const v = Testee.of(fn2);
                         const w = Testee.of(x);
                         const compose = (f1: (v: any) => any) => (
                             f2: (v: any) => any,
