@@ -16,7 +16,11 @@ export const testFunctorLaw = <Name>(
                     fc.integer(),
                     numberOperation,
                     numberOperation,
-                    async (x, f1, f2) => {
+                    async (
+                        x: number,
+                        f1: (v: number) => number,
+                        f2: (v: number) => number,
+                    ) => {
                         expect(
                             await getValue(
                                 Testee.of(x)
@@ -34,7 +38,7 @@ export const testFunctorLaw = <Name>(
 
         it('Identity', async () =>
             fc.assert(
-                fc.asyncProperty(fc.anything(), async x => {
+                fc.asyncProperty(fc.anything(), async (x: any) => {
                     expect(await getValue(Testee.of(x).map(identity))).toEqual(
                         await getValue(Testee.of(x)),
                     );

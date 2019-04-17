@@ -12,4 +12,6 @@ export default fc
         fc.constant(divideBy),
         fc.constant(substractBy),
     )
-    .chain(fn => fc.integer().map(nb => fn(nb)));
+    .chain((fn: (v: number) => (w: number) => number) =>
+        fc.integer().map((nb: number) => fn(nb)),
+    );
