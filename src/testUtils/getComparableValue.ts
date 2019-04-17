@@ -5,7 +5,7 @@ const getComparableValue = async <A>(
     result = [] as any[],
 ): Promise<any> => {
     if (!m) {
-        return [...result, m];
+        return result;
     }
 
     switch (m.name) {
