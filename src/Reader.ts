@@ -8,14 +8,13 @@ class Reader<Value, Dependencies> implements Category<Value, 'Reader'> {
         return new Reader(v => v);
     }
     public static lift<A, B, Dependencies>(
-        fn: (v: A) => (d: Dependencies) => B,
+        fn: (v: A) => B,
     ): (v: A) => Reader<B, any> {
-        return v =>
-            new Reader((dependencies: Dependencies) => fn(v)(dependencies));
+        return v => new Reader((_: Dependencies) => fn(v));
     }
     public readonly name = 'Reader';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
-    public readonly computation: (v: Dependencies) => Value;
+    private readonly computation: (v: Dependencies) => Value;
     constructor(computation: (v: Dependencies) => Value) {
         this.computation = computation;
     }

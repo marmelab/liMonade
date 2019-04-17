@@ -4,7 +4,7 @@ import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 
-describe('IO', () => {
+describe('Reader', () => {
     const double = (v: number) => v * 2;
     const increment = (v: number) => v + 1;
 
