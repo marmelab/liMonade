@@ -4,12 +4,10 @@ import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 
-const getStateValue = <T>(state: State<T, number>) => state.runState(5);
-
 describe('IO', () => {
-    testFunctorLaw(State, getStateValue);
-    testMonadLaw(State, getStateValue);
-    testApplicativeLaw(State, getStateValue);
+    testFunctorLaw(State);
+    testMonadLaw(State);
+    testApplicativeLaw(State);
 
     it('of should put value in value and state in state', () => {
         const state = State.of('value');

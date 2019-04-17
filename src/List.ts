@@ -1,13 +1,15 @@
 import { Category, InferCategory } from './types';
 
-const swap = <A, Name, Applicative>(
-    fn: (v: Applicative) => Category<A, Name>,
-) => (traversable: Category<List<A>, Name>, applicative: Applicative) =>
-    (fn(applicative) as InferCategory<A, Name>)
+const swap = <A, Name, Value>(fn: (v: Value) => Category<A, Name>) => (
+    traversable: Category<List<A>, Name>,
+    value: Value,
+) => {
+    return (fn(value) as InferCategory<A, Name>)
         .map((v: A) => (w: List<A>) => {
             return w.concat(v);
         })
         .ap(traversable);
+};
 
 export class List<Value> implements Category<Value, 'List'> {
     public static of<Value>(value: Value): List<Value> {
@@ -19,7 +21,7 @@ export class List<Value> implements Category<Value, 'List'> {
     public static fromArray<Value>(value: Value[]): List<Value> {
         return new List(value);
     }
-    public readonly name: 'List';
+    public readonly name = 'List';
     public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly Value: Value;
     private readonly values: ReadonlyArray<Value>;
@@ -30,7 +32,7 @@ export class List<Value> implements Category<Value, 'List'> {
         return this.values;
     }
     public concat(x: Value): List<Value> {
-        return new List(this.values.concat(x));
+        return new List([...this.values, x]);
     }
 
     public map<A, B>(this: List<A>, fn: (v: A) => B): List<B> {

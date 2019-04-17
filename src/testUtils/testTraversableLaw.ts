@@ -1,8 +1,11 @@
-import Compose from '../Compose';
+import * as fc from 'fast-check';
+import getCompose from '../Compose';
 import Either, { Left, Right } from '../Either';
-import Identity, { IdentityType } from '../Identity';
+import Identity from '../Identity';
 import Maybe, { MaybeType } from '../Maybe';
 import { InferCategory } from '../types';
+import getComparableValue from './getComparableValue';
+import randomApplicative from './randomApplicative';
 
 interface Pointed<Name> {
     of<A>(v: A): InferCategory<A, Name>;
@@ -11,65 +14,78 @@ interface Pointed<Name> {
 
 export const testTraversableLaw = <Name>(
     Testee: Pointed<Name>,
-    getValue: (v: any) => any = v => v,
+    getValue = getComparableValue,
 ) => {
     describe('Traversable Law', () => {
-        it('Identity', async () => {
-            expect(
-                await getValue(
-                    Testee.of('value')
-                        .map(Identity.of)
-                        .sequence(Identity.of),
-                ),
-            ).toEqual(await getValue(Identity.of(Testee.of('value'))));
-        });
+        it('Identity', async () =>
+            fc.assert(
+                fc.asyncProperty(fc.anything(), async x => {
+                    expect(
+                        await getValue(
+                            Testee.of(x)
+                                .map(Identity.of)
+                                .sequence(Identity.of),
+                        ),
+                    ).toEqual(await getValue(Identity.of(Testee.of(x))));
+                }),
+            ));
 
         it('Composition', async () => {
-            expect(
-                await getValue(
-                    Identity.of(Either.of(Testee.of(true)))
-                        .map(v => Compose(v))
-                        .sequence(v => Compose.of(v, Either, Testee)),
-                ),
-            ).toEqual(
-                await getValue(
-                    Compose(
-                        // @ts-ignore
-                        Identity.of(Either.of(Testee.of(true)))
-                            .sequence(Either.of)
-                            .map(
-                                (
-                                    v: IdentityType<
-                                        Right<InferCategory<any, Name>>
-                                    >,
-                                ) => v.sequence(Testee.of),
+            return fc.assert(
+                fc.asyncProperty(
+                    fc.anything().filter(v => v !== null && v !== undefined),
+                    randomApplicative,
+                    randomApplicative,
+                    async (x, ap1: Pointed<any>, ap2: Pointed<any>) => {
+                        const Compose = getCompose(ap1, ap2);
+                        expect(
+                            await getValue(
+                                Testee.of(x).traverse(
+                                    (v: any) => Compose.of(v),
+                                    (v: any) => Compose.of(v),
+                                ),
                             ),
-                    ),
+                        ).toEqual(
+                            await getValue(
+                                Compose(
+                                    Testee.of(x)
+                                        .traverse(ap1.of, ap1.of)
+                                        .map((v: any) =>
+                                            v.traverse(ap2.of, ap2.of),
+                                        ),
+                                ),
+                            ),
+                        );
+                    },
                 ),
             );
         });
 
         it('Naturality', async () => {
-            function maybeToEither<T>(
-                maybe: InferCategory<null, 'Maybe'>,
-            ): Left<Error>;
-            function maybeToEither<T>(maybe: MaybeType<T>): Right<T>;
-            function maybeToEither<T>(
-                maybe: MaybeType<T> | MaybeType<null>,
-            ): Right<T> | Left<Error> {
-                return maybe.isNothing()
-                    ? Either.Left(new Error('no value'))
-                    : Either.of(maybe.flatten());
-            }
-            const a = Testee.of(Maybe.of('value')).sequence(
-                Maybe.of,
-            ) as MaybeType<InferCategory<string, Name>>;
-            expect(await getValue(maybeToEither(a))).toEqual(
-                await getValue(
-                    Testee.of(Maybe.of('value'))
-                        .map(maybeToEither)
-                        .sequence(Either.of),
-                ),
+            fc.assert(
+                fc.asyncProperty(fc.anything(), async x => {
+                    function maybeToEither<T>(
+                        maybe: InferCategory<null, 'Maybe'>,
+                    ): Left<Error>;
+                    function maybeToEither<T>(maybe: MaybeType<T>): Right<T>;
+                    function maybeToEither<T>(
+                        maybe: MaybeType<T> | MaybeType<null>,
+                    ): Right<T> | Left<Error> {
+                        return maybe.isNothing()
+                            ? Either.Left(new Error('no value'))
+                            : Either.of(maybe.flatten());
+                    }
+                    const a = Testee.of(Maybe.of(x)).sequence(
+                        Maybe.of,
+                    ) as MaybeType<InferCategory<string, Name>>;
+                    expect(await getValue(maybeToEither(a))).toEqual(
+                        await getValue(
+                            Testee.of(Maybe.of(x))
+                                .map(maybeToEither)
+                                .sequence(Either.of),
+                        ),
+                    );
+                }),
             );
         });
     });
