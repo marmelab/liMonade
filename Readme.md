@@ -221,11 +221,11 @@ if(maybeABasket.isNothing()) {
 
 ## Maybe api
 
-- Maybe take a value and return a maybe, if the passed value is null or undefined, all operation on the maybe to change the value will be ignored.
+- Maybe takes a value and returns a maybe, if the passed value is null or undefined, all operation on the maybe that would change its value will be ignored.
 
 - Maybe.of: same as Maybe
 
-- Maybe.lift: Takes a function and wrap its return value in Maybe
+- Maybe.lift: Takes a function and wraps its return value in Maybe
 ```ts
 // Maybe.lift(fn: A => B): (v: A) => Maybe<B>;
 const fn = Maybe.lift(v => v * 2);
@@ -233,7 +233,7 @@ const fn = Maybe.lift(v => v * 2);
 const fn = v => Maybe.of(v * 2);
 ```
 
-- maybe.map: Take a function and apply it to the value if there is one
+- maybe.map: Takes a function and applies it to the value if there is one
 ```ts
 // Maybe<A>.map<fn: A => B>: Maybe<B>;
 Maybe.of(5).map(v => v * 2);
@@ -242,7 +242,8 @@ Maybe.of(5).map(v => v * 2);
 Maybe.of(null).map(v => v * 2);
 -> Maybe<null>;
 ```
-- maybe.flatten: If the value is another Maybe merge the two together. If there is no value, do nothing.
+- maybe.flatten: Given a maybe holding another maybe, will merge the two together.
+Do nothing if the maybe holds nothing
 ```ts
 // Maybe<Maybe<A>>.flatten(): Maybe<A>;
 Maybe.of(Maybe.of(5)).flatten();
@@ -272,7 +273,7 @@ Maybe.of(null).ap(Maybe.of(5));
 Maybe.of(v => v * 2).ap(Maybe.of(null));
 -> Maybe<null>;
 ```
-- maybe.sequence: when the maybe hold an applicative, it will swap the maybe with the applicative. If the maybe hold nothing it will place the maybe inside an apllicative.
+- maybe.sequence: when the maybe holds an applicative, it will swap the maybe with the applicative. When the maybe does not hold anything, it will place it inside an apllicative.
 ```ts
 /**
  * Maybe<Applicative<A>>.sequence(
@@ -290,7 +291,7 @@ Maybe.of(null).sequence(Identity.of);
     -> Identity<Maybe<null>>;
 ```
 - maybe.traverse: map a function returning an applicative and then swap the applicative with the maybe.
-If the maybe hold nothing, an Apllicative<Maybe<nothing>> will be returned
+If the maybe holds nothing, an Apllicative<Maybe<nothing>> is returned
 ```ts
 /*
  * Maybe<Applicative<A>>.traverse(
@@ -309,20 +310,20 @@ Maybe.of(5).traverse(v => Identity.of(v * 2));
 Maybe.of(null).traverse(v => Identity.of(v * 2));
     -> Identity<Maybe<10>>;
 ```
-- maybe.isNothing: return true if the maybe holds nothing (null or undefined)
+- maybe.isNothing: returns true if the maybe holds nothing (null or undefined)
 
 ```ts
 Maybe<A>.isNothing(): false;
 Maybe<nothing>.isNothing(): true;
 ```
 
-- maybe.isJust: return true if the maybe holds a value
+- maybe.isJust: returns true if the maybe holds a value
 
 ```ts
 Maybe<A>.isJust(): true;
 Maybe<nothing>.isJust(): false;
 ```
-- maybe.getOrElse: return the Maybe value or the given value if the maybe hold nothing.
+- maybe.getOrElse: returns the Maybe value or the given value if the maybe holds nothing.
 
 ```ts
 Maybe<A>.getOrElse(defaultValue: B): A;
@@ -331,7 +332,7 @@ Maybe<nothing>.getOrElse(defaultValue: B): B;
 
 # Either
 
-Either is used to handle possible error, if receiving an error it will preserve it, otherwise it will map normally. If any mapped function would trhow an error, the error will be placed in the Either.
+Either is used to handle possible error, if receiving an error it will preserve it, ignoring all operations. If any mapped function would throw an error, the error will be caught and placed in the Either.
 When the either holds a value, we say it is right, otherwise it is left.
 
 ## Example
@@ -391,7 +392,7 @@ parseUser('{ "name": "john" }').get(); // { name: 'john' }
 - Either.of: same as Either
 - Either.Right: same as Either but accept only non error value. Return a Right Either
 - Either.Left: same as Either but accept only error value. Return a Left Either
-- Either.lift: Take a function and wrap its return value in a Right Either or its thrown error in a left Either
+- Either.lift: Takes a function and wraps its return value in a Right Either. If it throws an error, it will be wrapped in a left Either instead.
 ```ts
 // Either.lift(fn: A => B): (v: A) => Either<B>;
 Either.lift(v => v * 2);
@@ -412,7 +413,7 @@ Either.of(new Error('Boom')).map(v => v * 2);
 -> Either<new Error('Boom')>;
 ```
 
-- either.flatten: If the value is another Either merge the two together. If the value is an Error do nothing.
+- either.flatten: Given the either holds another either, flatten will merge the two together. If the either holds an error it does nothing.
 ```ts
 // Either<Either<A>>.flatten(): Either<A>;
 Either.of(Either.of(5)).flatten();
@@ -459,8 +460,8 @@ Either.of(Identity.of(5)).sequence(Identity.of);
 Either.of(new Error('Boom')).sequence(Identity.of);
     -> Identity<Either<new Error('Boom')>>
 ```
-- maybe.traverse: map a function returning an applicative and then swap the applicative with the either.
-If the either hold an error, an Apllicative<Maybe<Error>> will be returned
+- either.traverse: Is the combination of map followed by sequence. It first modifies the holded value with the given function. The function must returns an applicative. And then it sequence, swapping the either with the applicative.
+If the either holds an error, the error will be preserved, and the maybe placed in an applicative (Applicative<Maybe<Error>>)
 ```ts
 /*
  * Either<Applicative<A>>.traverse(
@@ -479,7 +480,7 @@ Either.of(5).traverse(v => Identity.of(v * 2));
 Either.of(5).traverse(v => throw new Error('Boom'));
     -> Identity<Either<new Error('Boom')>>
 ```
-- maybe.catch: works like map, it accept a function, and will call it if the value is an error. It Will transform the Error in a value an return a Right Error.
+- maybe.catch: Works like map, it accept a function, and will call it only if the value is an error. It Will transform the Error in a value and returns a Right.
 ```ts
 // Either<A>.catch(fn: Error => B): Either<A>;
 Either.of(5).catch(error => error.message);
@@ -488,17 +489,17 @@ Either.of(5).catch(error => error.message);
 Either.of(new Error('Boom')).catch(error => error.message);
     -> Either<'Boom'>
 ```
-- maybe.isLeft: return true if the maybe holds an error
+- maybe.isLeft: returns true if the maybe holds an error
 ```ts
 Either<A>.isLeft(): false;
 Either<Error>.isLeft(): true;
 ```
-- maybe.isRight: return true if the maybe holds a value
+- maybe.isRight: returns true if the maybe holds a value
 ```ts
 Either<A>.isRight(): true;
 Either<Error>.isRight(): false;
 ```
-- maybe.get: return the value or throw the error
+- maybe.get: returns the value or throw the error
 ```ts
 Either<A>.get(): A;
 Either<Error>.get(): throw Error;
@@ -506,8 +507,8 @@ Either<Error>.get(): throw Error;
 
 ## IO
 
-IO is a shorthand for `Input/Output` IO is used to handle side effect. Instead of holding the value directly, we hold a function that will return the value. The important distinction compared to the previous monads is that IO is lazy. We can map all we want, nothing will happen until you call its execute method.
-It is useful to handle computation that depends on an external factor. Like user input.
+IO is a shorthand for `Input/Output` IO is used to handle side effects. Instead of holding the value directly, IO holds a function that will return the value. The important distinction compared to the previous monads is that IO is lazy. We can map all we want, nothing will be executed until you call its execute method.
+It is useful to handle computations that depends on an external factor. Like user input for example.
 
 ### Example
 
@@ -655,7 +656,7 @@ Task.of(5);
     -> Task<5>
 ```
 
-- Task.reject: take a value and return a Task rejected with this value. A rejected Task like a left either will ignore all operation on it except catch.
+- Task.reject: takes a value and returns a Task rejected with it. A rejected Task like a left either will ignore all operations on it except catch.
 
 ```ts
 Task.reject('error').map(v => v * 2);
