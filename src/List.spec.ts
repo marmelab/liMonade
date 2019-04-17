@@ -4,7 +4,7 @@ import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 import { testTraversableLaw } from './testUtils/testTraversableLaw';
 
-describe.only('List', () => {
+describe('List', () => {
     testFunctorLaw(List);
     testMonadLaw(List);
     testApplicativeLaw(List);

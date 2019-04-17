@@ -4,8 +4,6 @@ import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';
 
-// const getIOValue = <T>(io: IOType<T>) => io.execute();
-
 describe('IO', () => {
     testFunctorLaw(IO);
     testMonadLaw(IO);
