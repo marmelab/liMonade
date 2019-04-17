@@ -1,6 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class IO<Value> implements Applicative<Value, 'IO'>, Monad<Value, 'IO'> {
+class IO<Value> implements Category<Value, 'IO'> {
     public static of<Value>(value: Value): IO<Value> {
         return new IO(() => value);
     }
@@ -8,16 +8,19 @@ class IO<Value> implements Applicative<Value, 'IO'>, Monad<Value, 'IO'> {
         return v => IO.of(fn(v));
     }
     public readonly name: 'IO';
-    public readonly kind: 'IO';
-    public readonly computation: () => Value;
-    constructor(computation: () => Value) {
-        this.computation = computation;
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    private readonly sideEffect: () => Value;
+    constructor(sideEffect: () => Value) {
+        this.sideEffect = sideEffect;
+    }
+    public execute() {
+        return this.sideEffect();
     }
     public map<A, B>(this: IO<A>, fn: (v: A) => B): IO<B> {
-        return new IO(() => fn(this.computation()));
+        return new IO(() => fn(this.sideEffect()));
     }
     public flatten<A>(this: IO<IO<A>>): IO<A> {
-        return new IO(() => this.computation().computation());
+        return new IO(() => this.sideEffect().sideEffect());
     }
     public chain<A, B>(this: IO<A>, fn: ((v: A) => IO<B>)): IO<B> {
         return this.map(fn).flatten();
@@ -27,4 +30,10 @@ class IO<Value> implements Applicative<Value, 'IO'>, Monad<Value, 'IO'> {
     }
 }
 
-export default IO;
+export type IOType<Value> = IO<Value>;
+
+const IOExport = <Value>(sideEffect: () => Value) => new IO(sideEffect);
+IOExport.of = IO.of;
+IOExport.lift = IO.lift;
+
+export default IOExport;

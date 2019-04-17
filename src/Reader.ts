@@ -1,7 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class Reader<Value, Dependencies>
-    implements Applicative<Value, 'Reader'>, Monad<Value, 'Reader'> {
+class Reader<Value, Dependencies> implements Category<Value, 'Reader'> {
     public static of<Value>(value: Value): Reader<Value, any> {
         return new Reader(() => value);
     }
@@ -12,7 +11,7 @@ class Reader<Value, Dependencies>
         return v => Reader.of(fn(v));
     }
     public readonly name: 'Reader';
-    public readonly kind: 'Reader';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly computation: (v: Dependencies) => Value;
     constructor(computation: (v: Dependencies) => Value) {
         this.computation = computation;
@@ -46,4 +45,14 @@ class Reader<Value, Dependencies>
     }
 }
 
-export default Reader;
+export type ReaderType<Value, Dependencies> = Reader<Value, Dependencies>;
+
+const ReaderExport = <Value, Dependencies>(
+    computation: (v: Dependencies) => Value,
+) => new Reader(computation);
+
+ReaderExport.of = Reader.of;
+ReaderExport.ask = Reader.ask;
+ReaderExport.lift = Reader.lift;
+
+export default ReaderExport;

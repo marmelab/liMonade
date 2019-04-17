@@ -54,15 +54,12 @@ describe('IO', () => {
     });
 
     it('list should allow to convert a list of State into a single State of a list', () => {
-        const list = new List([1, 2, 3]);
+        const list = List([1, 2, 3]);
 
-        const state = list.traverse(State.of, v => State.of(v * 2)) as State<
-            List<number>,
-            number
-        >;
+        const state = list.traverse(v => State.of(v * 2), State.of);
 
         expect(state.runState(10)).toEqual({
-            value: new List([2, 4, 6]),
+            value: List([2, 4, 6]),
             state: 10,
         });
     });

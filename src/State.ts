@@ -1,7 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-class State<Value, Status>
-    implements Applicative<Value, 'State'>, Monad<Value, 'State'> {
+class State<Value, Status> implements Category<Value, 'State'> {
     public static of<Value, Status>(value: Value): State<Value, Status> {
         return new State((state: Status) => ({ value, state }));
     }
@@ -23,7 +22,7 @@ class State<Value, Status>
         return State.getState().chain((state: A) => State.of(f(state)));
     }
     public readonly name: 'State';
-    public readonly kind: 'State';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     public readonly runState: (v: Status) => { value: Value; state: Status };
     constructor(runState: (v: Status) => { value: Value; state: Status }) {
         this.runState = runState;
@@ -66,4 +65,17 @@ class State<Value, Status>
     }
 }
 
-export default State;
+export type StateType<Value, Status> = State<Value, Status>;
+
+const StateExport = <Value, Status>(
+    runState: (v: Status) => { value: Value; state: Status },
+) => new State(runState);
+
+StateExport.of = State.of;
+StateExport.lift = State.lift;
+StateExport.getState = State.getState;
+StateExport.save = State.save;
+StateExport.update = State.update;
+StateExport.getStateAndUpdate = State.getStateAndUpdate;
+
+export default StateExport;

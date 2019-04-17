@@ -1,54 +1,45 @@
-export interface Functor<Value, Kind, Name = Kind> {
-    readonly kind: Kind;
+import { ComposeType } from '../Compose';
+import { EitherType } from '../Either';
+import { IdentityType } from '../Identity';
+import { IOType } from '../IO';
+import { ListType } from '../List';
+import { MaybeType } from '../Maybe';
+import { ReaderType } from '../Reader';
+import { StateType } from '../State';
+import { TaskType } from '../Task';
+import { WriterType } from '../Writer';
+
+export type InferCategory<Value, Name> = Name extends 'Either'
+    ? EitherType<Value, 'Right' | 'Left'>
+    : Name extends 'Identity'
+    ? IdentityType<Value>
+    : Name extends 'IO'
+    ? IOType<Value>
+    : Name extends 'List'
+    ? ListType<Value>
+    : Name extends 'Maybe'
+    ? MaybeType<Value>
+    : Name extends 'Reader'
+    ? ReaderType<Value, any>
+    : Name extends 'State'
+    ? StateType<Value, any>
+    : Name extends 'Task'
+    ? TaskType<Value>
+    : Name extends 'Writer'
+    ? WriterType<Value>
+    : Name extends 'Compose'
+    ? ComposeType<Value, any, any>
+    : any;
+
+export type InferCategoryValue<CategoryClass> = CategoryClass extends Category<
+    infer Value,
+    any
+>
+    ? Value
+    : any;
+
+export interface Category<Value, Name> {
     readonly name: Name;
-    map<A, B>(
-        this: Functor<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Functor<B, Kind, Name>;
-}
-
-export interface Monad<Value, Kind, Name = Kind>
-    extends Functor<Value, Kind, Name> {
-    map<A, B>(
-        this: Monad<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Monad<B, Kind, Name>;
-    chain<A>(fn: ((v: Value) => Monad<A, Kind, Name>)): Monad<A, Kind, Name>;
-}
-
-export interface Applicative<Value, Kind, Name = Kind>
-    extends Functor<Value, Kind, Name> {
-    map<A, B>(
-        this: Applicative<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Applicative<B, Kind, Name>;
-    ap<A, B>(
-        this: Applicative<(v: A) => B, Kind, Name>,
-        v: Applicative<A, Kind, Name>,
-    ): Applicative<B, Kind, Name>;
-}
-
-export interface Traversable<Value, Kind, Name = Kind>
-    extends Applicative<Value, Kind, Name> {
-    map<A, B>(
-        this: Traversable<A, Kind, Name>,
-        fn: (value: A) => B,
-    ): Traversable<B, Kind, Name>;
-    ap<A, B>(
-        this: Traversable<(v: A) => B, Kind, Name>,
-        v: Traversable<A, Kind, Name>,
-    ): Traversable<B, Kind, Name>;
-    traverse<A, B, K, N = K>(
-        this: Traversable<A, Kind, Name>,
-        of: (
-            v: Traversable<A, Kind, Name>,
-        ) => Applicative<Traversable<A, Kind, Name>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Traversable<A, Kind, Name>, K, N>;
-    sequence<A, K, N = K>(
-        this: Traversable<Applicative<A, K, N>, Kind, Name>,
-        of: (
-            v: Traversable<A, Kind, Name>,
-        ) => Applicative<Traversable<A, Kind, Name>, K, N>,
-    ): Applicative<Traversable<A, Kind, Name>, K, N>;
+    // We need to have Value used in a Category property for typescript inferrence to work properly
+    readonly V: Value;
 }

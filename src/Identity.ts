@@ -1,7 +1,6 @@
-import { Applicative, Monad, Traversable } from './types';
+import { Category, InferCategory } from './types';
 
-class Identity<Value>
-    implements Traversable<Value, 'Identity'>, Monad<Value, 'Identity'> {
+class Identity<Value> implements Category<Value, 'Identity'> {
     public static of<Value>(value: Value): Identity<Value> {
         return new Identity(value);
     }
@@ -9,13 +8,13 @@ class Identity<Value>
         return v => new Identity(fn(v));
     }
     public readonly name: 'Identity';
-    public readonly kind: 'Identity';
-    private readonly value: Value;
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    public readonly value: Value;
     constructor(value: Value) {
         this.value = value;
         this.name = 'Identity';
     }
-    public map<A, B>(this: Identity<A>, fn: (v: A) => B) {
+    public map<A, B>(this: Identity<A>, fn: (v: A) => B): Identity<B> {
         return new Identity(fn(this.value));
     }
     public flatten<A>(this: Identity<Identity<A>>): Identity<A> {
@@ -30,19 +29,25 @@ class Identity<Value>
     ): Identity<B> {
         return this.chain(fn => other.map(fn));
     }
-    public traverse<A, B, K, N>(
+    public traverse<A, B, Name>(
         this: Identity<A>,
+        fn: (v: A) => Category<B, Name>,
         _: (v: any) => any,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<Identity<B>, K, N> {
-        return fn(this.value).map(Identity.of);
+    ): InferCategory<Identity<B>, Name> {
+        return (fn(this.value) as InferCategory<B, Name>).map(Identity.of);
     }
-    public sequence<A, K, N>(
-        this: Identity<Applicative<A, K, N>>,
+    public sequence<A, Name>(
+        this: Identity<Category<A, Name>>,
         of: (v: any) => any,
-    ) {
-        return this.traverse(of, v => v);
+    ): InferCategory<Identity<A>, Name> {
+        return this.traverse((v: Category<A, Name>) => v, of);
     }
 }
 
-export default Identity;
+export type IdentityType<Value> = Identity<Value>;
+
+const IdentityExport = <Value>(value: Value) => new Identity(value);
+IdentityExport.of = Identity.of;
+IdentityExport.lift = Identity.lift;
+
+export default IdentityExport;

@@ -1,24 +1,27 @@
-import { Applicative, Monad, Traversable } from './types';
+import { Category, InferCategory } from './types';
 
-const swap = <A, N, K, T>(fn: (v: T) => Applicative<A, N, K>) => (
-    traversable: Applicative<List<A>, N, K>,
-    applicative: T,
-) =>
-    fn(applicative)
-        .map(v => (w: List<A>) => {
+const swap = <A, Name, Applicative>(
+    fn: (v: Applicative) => Category<A, Name>,
+) => (traversable: Category<List<A>, Name>, applicative: Applicative) =>
+    (fn(applicative) as InferCategory<A, Name>)
+        .map((v: A) => (w: List<A>) => {
             return w.concat(v);
         })
         .ap(traversable);
 
-class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
+export class List<Value> implements Category<Value, 'List'> {
     public static of<Value>(value: Value): List<Value> {
         return new List([value]);
     }
     public static lift<A, B>(fn: (v: A) => B): (v: A) => List<B> {
         return v => List.of(fn(v));
     }
+    public static fromArray<Value>(value: Value[]): List<Value> {
+        return new List(value);
+    }
     public readonly name: 'List';
-    public readonly kind: 'List';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
+    public readonly Value: Value;
     private readonly values: ReadonlyArray<Value>;
     constructor(values: ReadonlyArray<Value>) {
         this.values = values;
@@ -54,17 +57,29 @@ class List<Value> implements Traversable<Value, 'List'>, Monad<Value, 'List'> {
         );
     }
 
-    public traverse<A, B, K, N>(
+    public traverse<A, B, Name>(
         this: List<A>,
-        of: (v: List<A>) => Applicative<List<A>, K, N>,
-        fn: (v: A) => Applicative<B, K, N>,
-    ): Applicative<List<B>, K, N> {
+        fn: (v: A) => Category<B, Name>,
+        of: (v: List<A>) => Category<List<A>, Name>,
+    ): InferCategory<List<B>, Name> {
         return this.values.reduce(swap(fn), of(new List([])));
     }
 
-    public sequence<A, K, N>(this: List<Applicative<A, K, N>>, of: any) {
-        return this.traverse(of, (v: Applicative<A, K, N>) => v);
+    public sequence<A, Name>(
+        this: List<Category<A, Name>>,
+        of: any,
+    ): InferCategory<List<A>, Name> {
+        return this.traverse((v: any) => v, of);
     }
 }
 
-export default List;
+export type ListType<Value> = List<Value>;
+
+export type IdentityType<Value> = List<Value>;
+
+const ListExport = <Value>(value: Value[]) => new List(value);
+ListExport.of = List.of;
+ListExport.lift = List.lift;
+ListExport.fromArray = List.fromArray;
+
+export default ListExport;

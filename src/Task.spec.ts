@@ -12,18 +12,16 @@ describe('Task', () => {
     testApplicativeLaw(Task, getTaskValue);
 
     it('should allow to chain async operation lazily', async () => {
-        const double = jest.fn(
-            (v: number) =>
-                new Task<number>((resolve: (v: number) => void) => {
-                    setTimeout(() => resolve(v * 2), 1);
-                }),
+        const double = jest.fn((v: number) =>
+            Task((resolve: (v: number) => void) => {
+                setTimeout(() => resolve(v * 2), 1);
+            }),
         );
 
-        const increment = jest.fn(
-            (v: number) =>
-                new Task<number>((resolve: (v: number) => void) => {
-                    setTimeout(() => resolve(v + 1), 1);
-                }),
+        const increment = jest.fn((v: number) =>
+            Task((resolve: (v: number) => void) => {
+                setTimeout(() => resolve(v + 1), 1);
+            }),
         );
         const task = Task.of(5)
             .chain(double)
@@ -39,18 +37,16 @@ describe('Task', () => {
     });
 
     it('should ignore operation after the task has been rejected', async () => {
-        const boom = jest.fn(
-            () =>
-                new Task((_, reject) => {
-                    setTimeout(() => reject(new Error('Boom')), 1);
-                }),
+        const boom = jest.fn(() =>
+            Task((_, reject) => {
+                setTimeout(() => reject(new Error('Boom')), 1);
+            }),
         );
 
-        const double = jest.fn(
-            (v: number) =>
-                new Task<number>((resolve: (v: number) => void) => {
-                    setTimeout(() => resolve(v * 2), 1);
-                }),
+        const double = jest.fn((v: number) =>
+            Task((resolve: (v: number) => void) => {
+                setTimeout(() => resolve(v * 2), 1);
+            }),
         );
 
         const task = Task.of(5)
@@ -67,18 +63,16 @@ describe('Task', () => {
     });
 
     it('should allow to resume operation with catch', async () => {
-        const boom = jest.fn(
-            () =>
-                new Task((_, reject) => {
-                    setTimeout(() => reject(new Error('Boom')), 1);
-                }),
+        const boom = jest.fn(() =>
+            Task((_, reject) => {
+                setTimeout(() => reject(new Error('Boom')), 1);
+            }),
         );
 
-        const double = jest.fn(
-            (v: number) =>
-                new Task<number>((resolve: (v: number) => void) => {
-                    setTimeout(() => resolve(v * 2), 1);
-                }),
+        const double = jest.fn((v: number) =>
+            Task((resolve: (v: number) => void) => {
+                setTimeout(() => resolve(v * 2), 1);
+            }),
         );
 
         const task = Task.of(5)
@@ -99,15 +93,15 @@ describe('Task', () => {
         const fn1 = jest.fn(resolve => setTimeout(() => resolve(1), 1));
         const fn2 = jest.fn(resolve => setTimeout(() => resolve(2), 2));
         const fn3 = jest.fn(resolve => setTimeout(() => resolve(3), 3));
-        const list = new List([new Task(fn1), new Task(fn2), new Task(fn3)]);
+        const list = List([Task(fn1), Task(fn2), Task(fn3)]);
 
-        const io = list.sequence(Task.of) as Task<List<number>>;
+        const io = list.sequence(Task.of);
 
         expect(fn1).toBeCalledTimes(0);
         expect(fn2).toBeCalledTimes(0);
         expect(fn3).toBeCalledTimes(0);
 
-        expect(await io.toPromise()).toEqual(new List([1, 2, 3]));
+        expect(await io.toPromise()).toEqual(List([1, 2, 3]));
 
         expect(fn1).toBeCalledTimes(1);
         expect(fn2).toBeCalledTimes(1);

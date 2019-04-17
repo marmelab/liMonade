@@ -1,11 +1,7 @@
-import { Monad } from '../types';
+import { InferCategory } from '../types';
 
-interface MonadConstructor<Kind, Name> {
-    of<T>(v: T): Monad<T, Kind, Name>;
-}
-
-export const testMonadLaw = <Kind, Name>(
-    Testee: MonadConstructor<Kind, Name>,
+export const testMonadLaw = <Name>(
+    Testee: InferCategory<number, Name>,
     getValue: (v: any) => any = v => v,
 ) => {
     const increment = (v: number) => v + 1;
@@ -23,7 +19,9 @@ export const testMonadLaw = <Kind, Name>(
                 ),
             ).toEqual(
                 await getValue(
-                    Testee.of(5).chain(v => doubleList(v).chain(incrementList)),
+                    Testee.of(5).chain((v: number) =>
+                        doubleList(v).chain(incrementList),
+                    ),
                 ),
             );
         });

@@ -1,7 +1,6 @@
-import { Applicative, Monad } from './types';
+import { Category } from './types';
 
-export default class Writer<Value>
-    implements Applicative<Value, 'Writer'>, Monad<Value, 'Writer'> {
+class Writer<Value> implements Category<Value, 'Writer'> {
     public static of<Value>(value: Value): Writer<Value> {
         return new Writer(value, []);
     }
@@ -9,7 +8,7 @@ export default class Writer<Value>
         return v => Writer.of(fn(v));
     }
     public readonly name: 'Writer';
-    public readonly kind: 'Writer';
+    public readonly V: Value; // Tag to allow typecript to properly infer Value type
     private readonly value: Value;
     private readonly log: any[];
     constructor(value: Value, log: any[] = []) {
@@ -40,3 +39,13 @@ export default class Writer<Value>
         return new Writer(inner.value, this.log.concat(inner.log));
     }
 }
+
+export type WriterType<Value> = Writer<Value>;
+
+const WriterExport = <Value>(value: Value, log: any[] = []) =>
+    new Writer(value, log);
+
+WriterExport.of = Writer.of;
+WriterExport.lift = Writer.lift;
+
+export default WriterExport;
