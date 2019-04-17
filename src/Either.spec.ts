@@ -1,4 +1,5 @@
 import Either, { Left, Right } from './Either';
+import Maybe from './Maybe';
 import { testApplicativeLaw } from './testUtils/testApplicativeLaw';
 import { testFunctorLaw } from './testUtils/testFunctorLaw';
 import { testMonadLaw } from './testUtils/testMonadLaw';

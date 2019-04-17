@@ -4,7 +4,7 @@ const swap = <A, Name, Value>(fn: (v: Value) => Category<A, Name>) => (
     traversable: Category<List<A>, Name>,
     value: Value,
 ) => {
-    return (fn(value) as InferCategory<A, Name>)
+    return (fn(value) as any)
         .map((v: A) => (w: List<A>) => {
             return w.concat(v);
         })

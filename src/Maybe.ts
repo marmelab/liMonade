@@ -84,7 +84,7 @@ export class Maybe<Value> implements Category<Value, 'Maybe'> {
     ): InferCategory<Maybe<B>, Name> | InferCategory<Maybe<nothing>, Name> {
         return this.isNothing()
             ? of(this)
-            : (fn(this.value) as InferCategory<A, Name>).map(Maybe.of);
+            : (fn(this.value) as any).map(Maybe.of);
     }
     public sequence<A, Name>(
         this: Maybe<Category<A, Name>>,
@@ -98,9 +98,7 @@ export class Maybe<Value> implements Category<Value, 'Maybe'> {
         this: Maybe<Category<A, Name>> | Maybe<nothing>,
         of: (v: any) => Category<Maybe<any>, Name>,
     ): InferCategory<Maybe<A>, Name> | InferCategory<Maybe<nothing>, Name> {
-        return this.isNothing()
-            ? of(this)
-            : (this.value as InferCategory<A, Name>).map(Maybe.of);
+        return this.isNothing() ? of(this) : (this.value as any).map(Maybe.of);
     }
 }
 

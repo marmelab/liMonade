@@ -117,7 +117,7 @@ class Either<Value, Type extends 'Left' | 'Right'>
     ): InferCategory<Right<A>, Name> {
         return this.isLeft()
             ? of(this)
-            : (fn(this.value) as InferCategory<A, Name>).map(Either.of);
+            : (fn(this.value) as any).map(Either.of);
     }
     public sequence<A, Name>(
         this: Right<Category<A, Name>>,
@@ -131,9 +131,7 @@ class Either<Value, Type extends 'Left' | 'Right'>
         this: Right<Category<A, Name>> | Left<Error>,
         of: (v: any) => any,
     ): InferCategory<Right<A>, Name> | Category<Left<Error>, Name> {
-        return this.isLeft()
-            ? of(this)
-            : (this.value as InferCategory<A, Name>).map(Either.of);
+        return this.isLeft() ? of(this) : (this.value as any).map(Either.of);
     }
 }
 

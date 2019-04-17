@@ -33,7 +33,7 @@ class Identity<Value> implements Category<Value, 'Identity'> {
         fn: (v: A) => Category<B, Name>,
         _: (v: any) => any,
     ): InferCategory<Identity<B>, Name> {
-        return (fn(this.value) as InferCategory<B, Name>).map(Identity.of);
+        return (fn(this.value) as any).map(Identity.of);
     }
     public sequence<A, Name>(
         this: Identity<Category<A, Name>>,

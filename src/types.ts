@@ -1,13 +1,13 @@
-import { ComposeType } from '../Compose';
-import { EitherType } from '../Either';
-import { IdentityType } from '../Identity';
-import { IOType } from '../IO';
-import { ListType } from '../List';
-import { MaybeType } from '../Maybe';
-import { ReaderType } from '../Reader';
-import { StateType } from '../State';
-import { TaskType } from '../Task';
-import { WriterType } from '../Writer';
+import { ComposeType } from './Compose';
+import { EitherType } from './Either';
+import { IdentityType } from './Identity';
+import { IOType } from './IO';
+import { ListType } from './List';
+import { MaybeType } from './Maybe';
+import { ReaderType } from './Reader';
+import { StateType } from './State';
+import { TaskType } from './Task';
+import { WriterType } from './Writer';
 
 export type InferCategory<Value, Name> = Name extends 'Either'
     ? EitherType<Value, 'Right' | 'Left'>

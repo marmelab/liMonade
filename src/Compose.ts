@@ -39,7 +39,7 @@ class Compose<Value, OuterName, InnerName>
         fn: (v: A) => B,
     ): Compose<B, OuterName, InnerName> {
         return new Compose(
-            this.value.map((x: InferCategory<A, InnerName>) => {
+            (this.value as any).map((x: any) => {
                 return x.map(fn);
             }),
         );
@@ -49,15 +49,8 @@ class Compose<Value, OuterName, InnerName>
         other: Compose<A, OuterName, InnerName>,
     ): Compose<B, OuterName, InnerName> {
         return new Compose(
-            other.value
-                .map(
-                    (u: InferCategory<A, InnerName>) => (
-                        y: InferCategory<
-                            InferCategory<(v: A) => B, InnerName>,
-                            InnerName
-                        >,
-                    ) => y.ap(u),
-                )
+            (other.value as any)
+                .map((u: any) => (y: any) => y.ap(u))
                 .ap(this.value),
         ) as Compose<B, OuterName, InnerName>;
     }
