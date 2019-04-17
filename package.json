@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "clean": "rm -r dist",
+    "build": "tsc --rootDir src/ --outDir dist"
   },
   "author": "Thiery Michel",
   "license": "MIT",
