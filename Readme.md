@@ -23,18 +23,18 @@ Promise.resolve('hello world').then(toUpperCase);
 // Promise<'HELLO WORLD'>;
 ```
 
-Here toUppercase is used with multiple values, and with an asynchronous result, and yet it does not have to worry about it. It just take a string and change it to uppercase.
+Here toUppercase is used with multiple values, and with an asynchronous result, and yet it does not have to worry about it. It just takes a string and changes it to uppercase.
 
 Each Monad are for handling a specific context.
 Maybe are for handling null value.
 Either for error.
-List for multiple value
-IO for side effect
-Reader for shared dependencies
-Writer for log
-State for stateful computation
-Task for asynchronous operation
-Identity for no context at all
+List for multiple value.
+IO for side effect.
+Reader for shared dependencies.
+Writer for log.
+State for stateful computation.
+Task for asynchronous operation.
+Identity for no context at all.
 
 # Identity
 
@@ -67,7 +67,7 @@ identity.value; // 5
 
 ## Identity is a functor with a map method
 
-`map` exist on all functor and has the following properties:
+`map` exists on all functor and has the following properties:
 
 - It only changes the value holded by the functor and nothing else
 
@@ -91,7 +91,7 @@ So mapping uppercase then split is the same as mapping the composition of upperc
 
 ## Identity is a monad with a chain method
 
-When you begin to use functor extensively, you can endup to need to compose a function that returns an identity.
+When you begin to use functor extensively, you can endup to need to compose a function that returns a functor.
 
 ```js
 const doubleId = v => Identity.of(v * 2);
@@ -148,7 +148,7 @@ const id = Identity.of(List([1, 2, 3])); // Identity<List<[1, 2, 3]>>
 id.sequence(Maybe.of); // List<[Identity<1>, Identity<2>, Identity<3>]>
 ```
 
-The traverse method first transforms the value to an applicative, then permute.
+The traverse method first transforms the value to an applicative, then do the same as sequence.
 
 ```js
 const stringToList = v => List(v.split(''));
@@ -174,7 +174,7 @@ doubleThatReturnsAnIdentity(5); // Identity<10>
 
 # Maybe
 
-Maybe is used to hanlde null value. That is, if we have no value, then it won't call the function and so it will keep a null value.
+Maybe is used to hanlde null value. That is, if we have no value, then it won't call the function and so it will keep a null value. No more need to test if we have a value or not.
 Maybe has the same methods as identity.
 Let's say that we want to retrieve value from the localStorage and do computation on it only if it's here.
 
@@ -221,11 +221,11 @@ if(maybeABasket.isNothing()) {
 
 ## Maybe api
 
-- Maybe takes a value and returns a maybe, if the passed value is null or undefined, all operation on the maybe that would change its value will be ignored.
+- Maybe: takes a value and returns a maybe, if the passed value is null or undefined, all operation on the maybe that would change its value will be ignored.
 
 - Maybe.of: same as Maybe
 
-- Maybe.lift: Takes a function and wraps its return value in Maybe
+- Maybe.lift: Takes a function and wraps its return value in a Maybe
 ```ts
 // Maybe.lift(fn: A => B): (v: A) => Maybe<B>;
 const fn = Maybe.lift(v => v * 2);
@@ -242,38 +242,50 @@ Maybe.of(5).map(v => v * 2);
 Maybe.of(null).map(v => v * 2);
 -> Maybe<null>;
 ```
-- maybe.flatten: Given a maybe holding another maybe, will merge the two together.
-Do nothing if the maybe holds nothing
+- maybe.flatten: Given a maybe holding another maybe, flatten will merge the two together.
 ```ts
 // Maybe<Maybe<A>>.flatten(): Maybe<A>;
 Maybe.of(Maybe.of(5)).flatten();
 -> Maybe<5>;
+```
+If the maybe holds nothing, flatten do nothing
+```ts
 // Maybe<null | undefined>.flatten(): Maybe<null | undefined>;
 Maybe.of(null).flatten();
 -> Maybe<null>;
 ```
-- maybe.chain
+- maybe.chain: Takes a function returning a maybe, map it and then flatten the result.
 ```ts
 //Maybe<A>.chain(fn: A => Maybe<B>): Maybe<B>;
 Maybe.of(5).chain(v => Maybe.of(v * 2));
 -> Maybe<10>;
+```
+If the maybe holds no value, chain do nothing
+```ts
 // Maybe<nothing>.chain(fn: A => Maybe<B>): Maybe<nothing>;
 Maybe.of(null).chain(v => Maybe.of(v * 2));
 -> Maybe<null>;
 ```
-- maybe.ap
+- maybe.ap: Given a maybe holding a function. Ap takes another maybe. It will execute the function of the first maybe with the value of the other maybe. The result is a new maybe with the result of the function.
+
 ```ts
 // Maybe<A => B>.ap(other: Maybe<A>): Maybe<B>;
 Maybe.of(v => v * 2).ap(Maybe.of(5));
 -> Maybe<10>;
+```
+If the maybe holds no value, ap does nothing.
+```ts
 // Maybe<nothing>.ap(other: Maybe<A>): Maybe<nothing>;
 Maybe.of(null).ap(Maybe.of(5));
 -> Maybe<null>;
+```
+If the maybe passed to ap holds nothing, ap will return it.
+```ts
 // Maybe<A => B>.ap(other: Maybe<nothing>): Maybe<nothing>;
 Maybe.of(v => v * 2).ap(Maybe.of(null));
 -> Maybe<null>;
 ```
-- maybe.sequence: when the maybe holds an applicative, it will swap the maybe with the applicative. When the maybe does not hold anything, it will place it inside an apllicative.
+- maybe.sequence: when the maybe holds an applicative, it will swap the maybe with the applicative.
 ```ts
 /**
  * Maybe<Applicative<A>>.sequence(
@@ -282,6 +294,9 @@ Maybe.of(v => v * 2).ap(Maybe.of(null));
  * */
 Maybe.of(Identity.of(5)).sequence(Identity.of);
     -> Identity<Maybe<5>>;
+```
+When the maybe does not hold anything, it will place it inside an applicative.
+```ts
 /*
  * Maybe<nothing>.sequence<A>(
  *     of: Value => Applicative<Value>,
@@ -291,7 +306,6 @@ Maybe.of(null).sequence(Identity.of);
     -> Identity<Maybe<null>>;
 ```
 - maybe.traverse: map a function returning an applicative and then swap the applicative with the maybe.
-If the maybe holds nothing, an Apllicative<Maybe<nothing>> is returned
 ```ts
 /*
  * Maybe<Applicative<A>>.traverse(
@@ -301,6 +315,9 @@ If the maybe holds nothing, an Apllicative<Maybe<nothing>> is returned
  * */
 Maybe.of(5).traverse(v => Identity.of(v * 2));
     -> Identity<Maybe<10>>;
+```
+If the maybe holds nothing, an Apllicative<Maybe<nothing>> is returned
+```ts
 /*
  * Maybe<nothing>.traverse(
  *     of: Value => Applicative<Value>,
@@ -402,48 +419,71 @@ Either.lift(v => throw new Error('Boom'));
     -> v => Either.of(new Error('Boom'));
 ```
 
-- either.map: Take a function and apply it to the value if it's not an error. If the function throw an error a Left Either of the error is returned
+- either.map: Take a function and apply it to the value if it's not an error.
+
 ```ts
 // Either<A>.map(fn: A => B): Either<B>;
 Either.of(5).map(v => v * 2);
 -> Either<10>;
-
+```
+If Either holds an error, map does nothing
+```ts
 // Either<Error>.map(fn: A => B): Either<Error>;
 Either.of(new Error('Boom')).map(v => v * 2);
 -> Either<new Error('Boom')>;
 ```
+If the function throw an error a Left Either of the error is returned
+```ts
+// Either<Error>.map(fn: A => B): Either<Error>;
+Either.of(5).map(v => { throw new Error('Boom'); });
+-> Either<new Error('Boom')>;
+```
 
-- either.flatten: Given the either holds another either, flatten will merge the two together. If the either holds an error it does nothing.
+- either.flatten: Given the either holds another either, flatten will merge the two together.
+
 ```ts
 // Either<Either<A>>.flatten(): Either<A>;
 Either.of(Either.of(5)).flatten();
     -> Either<5>
+```
+If the either holds an error it does nothing.
+```ts
 // Either<Error>.flatten(): Either<Error>;
 Either.of(new Error('Boom')).flatten();
     -> Either<new Error('Boom')>
 ```
-- either.chain
+
+- either.chain: Takes a function returning an either, map it to the value and then flatten the resulting either.
 ```ts
 // Either<A>.chain<A, B>(fn: A => Either<B>): Either<B>;
 Either.of(5).chain(v => Either(v * 2));
     -> Either<10>
+```
+If the either holds an error, chain does nothing
+```ts
 // Either<Error>.chain(fn: A => Either<B>): Either<Error>;
 Either.of(5).chain(v => v.concat('uh'));
     -> Either<Error('v.concat is not a function')>
 ```
-- either.ap
+- either.ap: Given an either holding a function. Ap takes another either. It will execute the function of the first either with the value of the other either. The result is a new either with the result of the function.
 ```ts
 // Either<A => B>.ap(other: Either<A>): Either<B>;
 Either.of(v => v * 2).ap(Either.of(5));
     -> Either<10>
+```
+If the either holds an error, ap does nothing
+```ts
 // Either<Error>.ap(other: Either<A>): Either<Error>;
 Either.of(new Error('Boom')).ap(Either.of(5));
     -> Either<new Error('Boom')>
+```
+If the passed either holds an error, ap return the other either
+```ts
 // Either<A => B>.ap(other: Either<Error>): Either<Error>;
 Either.of(v => v * 2).ap(Either.of(new Error('Boom')));
     -> Either<new Error('Boom')>
 ```
-- either.sequence: when the either hold an applicative, it will swap the either with the applicative. If the either hold an error it will place the either inside an apllicative.
+- either.sequence: when the either hold an applicative, it will swap the either with the applicative.
 ```ts
 /*
  * Either<Applicative<A>>.sequence(
@@ -452,6 +492,9 @@ Either.of(v => v * 2).ap(Either.of(new Error('Boom')));
  * */
 Either.of(Identity.of(5)).sequence(Identity.of);
     -> Identity<Either<5>>
+```
+If the either holds an error it will place the either inside an applicative.
+```ts
 /*
  * Either<Error>.sequence(
  *     of: Value => Applicative<Value>,
@@ -461,7 +504,6 @@ Either.of(new Error('Boom')).sequence(Identity.of);
     -> Identity<Either<new Error('Boom')>>
 ```
 - either.traverse: Is the combination of map followed by sequence. It first modifies the holded value with the given function. The function must returns an applicative. And then it sequence, swapping the either with the applicative.
-If the either holds an error, the error will be preserved, and the maybe placed in an applicative (Applicative<Maybe<Error>>)
 ```ts
 /*
  * Either<Applicative<A>>.traverse(
@@ -471,6 +513,9 @@ If the either holds an error, the error will be preserved, and the maybe placed 
  * */
 Either.of(5).traverse(v => Identity.of(v * 2));
     -> Identity<Either<10>>
+```
+If the function throw an error, the error will be palced in an either, and the either in an applicative (Applicative<Maybe<Error>>)
+```ts
 /*
  * Either<Error>.sequence(
  *     fn: A => Applicative<B>,
