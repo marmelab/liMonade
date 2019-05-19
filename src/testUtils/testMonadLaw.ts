@@ -1,12 +1,10 @@
 import * as fc from 'fast-check';
-import { InferCategory } from '../types';
+
+import { Monad } from '../types';
 import getComparableValue from './getComparableValue';
 import numberOperation from './numberOperation';
 
-export const testMonadLaw = <Name>(
-    Testee: InferCategory<number, Name>,
-    getValue = getComparableValue,
-) => {
+export const testMonadLaw = (Testee: Monad, getValue = getComparableValue) => {
     describe('Monad Laws', () => {
         it('.chain should be associative', async () =>
             fc.assert(

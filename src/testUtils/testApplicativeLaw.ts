@@ -1,14 +1,11 @@
 import * as fc from 'fast-check';
-import { InferCategory } from '../types';
+
+import { Applicative } from '../types';
 import getComparableValue from './getComparableValue';
 import numberOperation from './numberOperation';
 
-interface Pointed<Name> {
-    of<A>(v: A): InferCategory<A, Name>;
-}
-
-export const testApplicativeLaw = <Name>(
-    Testee: Pointed<Name>,
+export const testApplicativeLaw = (
+    Testee: Applicative,
     getValue = getComparableValue,
 ) => {
     describe('Applicative Functor Law', () => {

@@ -1,12 +1,13 @@
 import * as fc from 'fast-check';
-import { InferCategory } from '../types';
+
+import { Functor } from '../types';
 import getComparableValue from './getComparableValue';
 import numberOperation from './numberOperation';
 
 const identity = <T>(v: T) => v;
 
-export const testFunctorLaw = <Name>(
-    Testee: InferCategory<any, Name>,
+export const testFunctorLaw = (
+    Testee: Functor,
     getValue = getComparableValue,
 ) => {
     describe('Functor Laws', () => {

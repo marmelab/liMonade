@@ -1,9 +1,10 @@
 import * as fc from 'fast-check';
+
 import getCompose from '../Compose';
 import Either, { Left, Right } from '../Either';
 import Identity from '../Identity';
 import Maybe, { MaybeType } from '../Maybe';
-import { InferCategory } from '../types';
+import { InferCategory, Traversable } from '../types';
 import getComparableValue from './getComparableValue';
 import randomApplicative from './randomApplicative';
 
@@ -13,7 +14,7 @@ interface Pointed<Name> {
 }
 
 export const testTraversableLaw = <Name>(
-    Testee: Pointed<Name>,
+    Testee: Traversable,
     getValue = getComparableValue,
 ) => {
     describe('Traversable Law', () => {
