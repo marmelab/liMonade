@@ -174,7 +174,7 @@ doubleThatReturnsAnIdentity(5); // Identity<10>
 
 # Maybe
 
-Maybe is used to hanlde null value. That is, if we have no value, then it won't call the function and so it will keep a null value. No more need to test if we have a value or not.
+Maybe is used to handle null value. That is, if we have no value, then it won't call the function and so it will keep a null value. No more need to test if we have a value or not.
 Maybe has the same methods as identity.
 Let's say that we want to retrieve value from the localStorage and do computation on it only if it's here.
 
