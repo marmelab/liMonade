@@ -1,9 +1,10 @@
 import * as fc from 'fast-check';
+
 import getCompose from '../Compose';
 import Either, { Left, Right } from '../Either';
 import Identity from '../Identity';
 import Maybe, { MaybeType } from '../Maybe';
-import { InferCategory } from '../types';
+import { InferCategory, Traversable } from '../types';
 import getComparableValue from './getComparableValue';
 import randomApplicative from './randomApplicative';
 
@@ -13,13 +14,13 @@ interface Pointed<Name> {
 }
 
 export const testTraversableLaw = <Name>(
-    Testee: Pointed<Name>,
+    Testee: Traversable,
     getValue = getComparableValue,
 ) => {
     describe('Traversable Law', () => {
         it('Identity', async () =>
             fc.assert(
-                fc.asyncProperty(fc.anything(), async x => {
+                fc.asyncProperty(fc.anything(), async (x: any) => {
                     expect(
                         await getValue(
                             Testee.of(x)
@@ -33,10 +34,12 @@ export const testTraversableLaw = <Name>(
         it('Composition', async () => {
             return fc.assert(
                 fc.asyncProperty(
-                    fc.anything().filter(v => v !== null && v !== undefined),
+                    fc
+                        .anything()
+                        .filter((v: any) => v !== null && v !== undefined),
                     randomApplicative,
                     randomApplicative,
-                    async (x, ap1: Pointed<any>, ap2: Pointed<any>) => {
+                    async (x: any, ap1: Pointed<any>, ap2: Pointed<any>) => {
                         const Compose = getCompose(ap1, ap2);
                         expect(
                             await getValue(
@@ -63,7 +66,7 @@ export const testTraversableLaw = <Name>(
 
         it('Naturality', async () => {
             fc.assert(
-                fc.asyncProperty(fc.anything(), async x => {
+                fc.asyncProperty(fc.anything(), async (x: any) => {
                     function maybeToEither<T>(
                         maybe: InferCategory<null, 'Maybe'>,
                     ): Left<Error>;

@@ -20,7 +20,7 @@ const getComparableValue = async <A>(
             );
         }
         case 'Reader': {
-            return getComparableValue(m.computation('entry'), [
+            return getComparableValue(m.execute('entry'), [
                 ...result,
                 'Reader',
             ]);

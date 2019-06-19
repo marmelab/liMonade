@@ -1,14 +1,16 @@
 {
   "name": "limonade",
   "version": "1.0.0",
-  "description": "",
+  "description": "A simple monad library.",
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "clean": "rm -r dist",
+    "build": "tsc --rootDir src/ --outDir dist"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Thiery Michel",
+  "license": "MIT",
   "devDependencies": {
     "@types/jest": "23.3.9",
     "@types/node": "10.3.4",

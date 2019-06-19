@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
       "declaration": true,
-      "module": "commonjs",
+      "module": "system",
       "noFallthroughCasesInSwitch": true,
       "noImplicitReturns": true,
       "removeComments": true,
@@ -17,6 +17,7 @@
   },
   "exclude": [
       "node_modules",
-      "**/*.spec.ts"
+      "**/*.spec.ts",
+      "src/testUtils"
   ]
 }

@@ -14,11 +14,12 @@ test-watch: ## Run Unit Tests Using Watch Mode
 
 build: ## Make local packages build. Usefull to test build because otherwise the publication automatically launches the build
 	yarn clean
-	./node_modules/.bin/lerna run prepare
+	yarn build
 
 publish: ## Publish on npm
 	yarn clean
-	./node_modules/.bin/lerna publish
+	yarn build
+	yarn publish
 
 serve-documentation:
 	docker run -it --rm \
